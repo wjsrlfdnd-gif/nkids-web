@@ -95,7 +95,7 @@ function loadHeader() {
                 </li>
 
                 <li><a href="proposal.html" style="color:#1a3c6e; font-weight:bold;">견적요청</a></li>
-		<li><a href="login.html" style="background:#1a3c6e; color:#fff; padding:8px 15px; border-radius:20px; font-size:0.9rem;">Login</a></li>
+		
             </ul>
         </div>
     `;
