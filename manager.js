@@ -5,7 +5,7 @@ const SHEET_URL = "여기에_아까_복사한_구글시트_주소를_붙여넣�
 
 // [★중요★] 여기에 사장님의 진짜 로고 이미지 주소를 넣으세요!
 // 지금은 테스트용 임시 이미지가 들어있습니다.
-const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/logo.png";
+const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/nkids-web/logo.png";
 
 
 // 기본 정보
@@ -42,13 +42,21 @@ async function loadDataFromSheet() {
 
 // [4] 헤더(메뉴) 만들기 - ★여기에 퍼포먼스 메뉴가 추가되었습니다★
 function loadHeader() {
-    // 1. 스타일 주입 (로고, 드롭다운)
+   // 1. 스타일 주입 (로고, 드롭다운, ★리스트 점 없애기 추가됨★)
     const style = document.createElement('style');
     style.innerHTML = `
+        /* [핵심] 모든 메뉴의 점(bullet) 없애기 & 여백 초기화 */
+        ul.nav-menu, ul.dropdown { 
+            list-style: none !important; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        /* 드롭다운 스타일 */
         .nav-menu li { position: relative; padding: 10px 0; }
         .dropdown {
             display: none; position: absolute; top: 100%; left: 50%; 
-            transform: translateX(-50%); background: white; min-width: 200px; /* 메뉴가 길어져서 너비 늘림 */
+            transform: translateX(-50%); background: white; min-width: 200px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px;
             border: 1px solid #eee; padding: 10px 0; z-index: 9999;
         }
@@ -89,14 +97,13 @@ function loadHeader() {
                     <ul class="dropdown">
                         <li><a href="season.html">🎉 시즌 테마 행사</a></li>
                         <li><a href="culture.html">🌍 원어민 문화 체험</a></li>
-                        
                         <li><a href="performance.html">🤹 오감 퍼포먼스</a></li>
                     </ul>
                 </li>
 
                 <li><a href="proposal.html" style="color:#1a3c6e; font-weight:bold;">견적요청</a></li>
-		
-            </ul>
+                
+                </ul>
         </div>
     `;
 }

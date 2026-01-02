@@ -8,42 +8,56 @@
         /* [스타일] */
         * { box-sizing: border-box; }
         body { font-family: 'Pretendard', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        
+        a { text-decoration: none; }
+
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         
-        /* 헤더 영역 */
-        .board-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1a3c6e; padding-bottom: 20px; margin-bottom: 20px; }
+        /* [수정됨] 헤더 영역 스타일 */
+        .board-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 2px solid #1a3c6e; padding-bottom: 20px; margin-bottom: 20px; 
+            flex-wrap: wrap; gap: 15px; /* 모바일에서 줄바꿈 대응 */
+        }
         .board-title { color: #1a3c6e; font-size: 1.8rem; font-weight: bold; }
-        .btn-logout { background: #666; color: #fff; padding: 8px 20px; border-radius: 5px; cursor: pointer; border: none; font-weight: bold; }
-        .btn-logout:hover { background: #444; }
+        
+        /* 버튼 그룹 (홈으로 + 로그아웃) */
+        .header-btns { display: flex; gap: 10px; }
+
+        .btn-common { padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; cursor: pointer; border: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        
+        /* 홈 버튼 색상 */
+        .btn-home { background: #1a3c6e; color: #fff; }
+        .btn-home:hover { background: #132b4f; }
+
+        /* 로그아웃 버튼 색상 */
+        .btn-logout { background: #888; color: #fff; }
+        .btn-logout:hover { background: #666; }
 
         /* 게시판 테이블 */
         .board-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
         .board-table th { background: #f8f9fa; padding: 15px; border-bottom: 2px solid #ddd; color: #555; font-weight: bold; text-align: center; }
         .board-table td { padding: 15px; border-bottom: 1px solid #eee; color: #333; text-align: center; }
         
-        /* 제목은 왼쪽 정렬 + 클릭 가능하게 */
         .board-table td.title-col { text-align: left; cursor: pointer; color: #1a3c6e; font-weight: 500; }
         .board-table td.title-col:hover { text-decoration: underline; color: #f4a261; }
         
         /* 모바일 대응 */
         @media (max-width: 600px) {
-            .board-table th:nth-child(1), .board-table td:nth-child(1), /* 번호 숨김 */
-            .board-table th:nth-child(3), .board-table td:nth-child(3), /* 작성자 숨김 */
-            .board-table th:nth-child(4), .board-table td:nth-child(4) { display: none; } /* 날짜 숨김 */
+            .board-table th:nth-child(1), .board-table td:nth-child(1), 
+            .board-table th:nth-child(3), .board-table td:nth-child(3), 
+            .board-table th:nth-child(4), .board-table td:nth-child(4) { display: none; }
             .board-title { font-size: 1.4rem; }
+            .container { padding: 20px; }
         }
 
-        /* 팝업(모달) 스타일 - 글 내용 보기 */
+        /* 팝업(모달) 스타일 */
         #post-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
         .modal-content { background-color: #fff; margin: 10% auto; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
-        .close-btn:hover { color: #000; }
-        
         .modal-header { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
         .modal-title { font-size: 1.4rem; font-weight: bold; color: #1a3c6e; margin-bottom: 10px; }
         .modal-meta { font-size: 0.9rem; color: #888; }
-        .modal-body { line-height: 1.8; color: #333; min-height: 150px; white-space: pre-line; /* 줄바꿈 적용 */ }
+        .modal-body { line-height: 1.8; color: #333; min-height: 150px; white-space: pre-line; }
     </style>
 </head>
 <body>
@@ -51,11 +65,15 @@
     <div class="container">
         <div class="board-header">
             <div class="board-title">📢 학부모 알림장</div>
-            <button class="btn-logout" onclick="logout()">로그아웃</button>
+            
+            <div class="header-btns">
+                <a href="index.html" class="btn-common btn-home">🏠 홈으로</a>
+                <button class="btn-common btn-logout" onclick="logout()">로그아웃</button>
+            </div>
         </div>
 
         <p style="margin-bottom: 20px; color: #666;">
-            아이들의 활동 소식과 공지사항을 확인하세요. (작성된 글을 클릭하면 내용을 볼 수 있습니다.)
+            아이들의 활동 소식과 공지사항을 확인하세요. (제목을 클릭하면 내용을 볼 수 있습니다.)
         </p>
 
         <table class="board-table">
@@ -82,47 +100,40 @@
                 <div class="modal-title" id="m-title">제목</div>
                 <div class="modal-meta" id="m-meta">날짜 | 작성자</div>
             </div>
-            <div class="modal-body" id="m-body">
-                내용이 여기에 나옵니다.
-            </div>
+            <div class="modal-body" id="m-body">내용</div>
         </div>
     </div>
 
     <script>
-        // [1] 로그인 체크 (공용 비밀번호 방식)
+        // [1] 로그인 체크
         if (sessionStorage.getItem("isParent") !== "true") {
             alert("로그인이 필요합니다.");
             window.location.href = "login.html";
         }
 
-        // [2] 엑셀 게시판 데이터 주소 (★여기에 복사한 주소를 넣으세요★)
+        // [2] 엑셀 게시판 데이터 주소 (★여기에 주소를 꼭 다시 넣어주세요!★)
         const BOARD_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSN8NdA-JjKfu9o4yDerh-yIRyxZwqiqWNiibSCRPfmk9DYz370uAOq_H9A1oUDLDi6olVwHAi52Qth/pub?gid=0&single=true&output=csv";
 
-        // [3] 게시글 불러오기 함수
+        // [3] 게시글 불러오기
         async function loadBoard() {
             try {
                 const response = await fetch(BOARD_SHEET_URL);
                 const data = await response.text();
-                const rows = data.split("\n").slice(1); // 첫 줄(제목) 제외
+                const rows = data.split("\n").slice(1); 
 
                 const boardList = document.getElementById('board-list');
-                boardList.innerHTML = ""; // 로딩 문구 지우기
+                boardList.innerHTML = ""; 
 
-                // 최신 글이 위로 오게 (배열 뒤집기)
                 rows.reverse().forEach((row, index) => {
                     if(row.trim() === "") return;
-
-                    // 엑셀 칸 나누기 (따옴표 처리 포함)
                     const cols = parseCSVRow(row);
                     
-                    // A:번호, B:제목, C:날짜, D:작성자, E:내용
                     const no = cols[0];
                     const title = cols[1];
                     const date = cols[2];
                     const writer = cols[3];
                     const content = cols[4];
 
-                    // 테이블에 행 추가
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${no}</td>
@@ -135,11 +146,10 @@
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('board-list').innerHTML = `<tr><td colspan="4">게시글을 불러오지 못했습니다.</td></tr>`;
+                document.getElementById('board-list').innerHTML = `<tr><td colspan="4">게시글을 불러오지 못했습니다. (주소를 확인해주세요)</td></tr>`;
             }
         }
 
-        // CSV 파싱 함수 (콤마 안에 있는 콤마 처리용)
         function parseCSVRow(row) {
             const result = [];
             let current = '';
@@ -155,15 +165,11 @@
             return result;
         }
 
-        // [4] 모달(팝업) 관련 함수
         function openModal(title, writer, date, content) {
             document.getElementById('m-title').innerText = title;
             document.getElementById('m-meta').innerText = `작성일: ${writer} | 작성자: ${date}`;
-            
-            // 엑셀에서 줄바꿈이 깨지지 않도록 처리
             const cleanContent = content.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
             document.getElementById('m-body').innerText = cleanContent;
-            
             document.getElementById('post-modal').style.display = 'block';
         }
 
@@ -171,7 +177,6 @@
             document.getElementById('post-modal').style.display = 'none';
         }
 
-        // 바깥 클릭 시 닫기
         window.onclick = function(event) {
             if (event.target == document.getElementById('post-modal')) {
                 closeModal();
@@ -180,10 +185,9 @@
 
         function logout() {
             sessionStorage.removeItem("isParent");
-            window.location.href = "index.html";
+            window.location.href = "login.html"; // 로그아웃 시 로그인 화면으로
         }
 
-        // 페이지 시작 시 게시글 로딩
         loadBoard();
     </script>
 
