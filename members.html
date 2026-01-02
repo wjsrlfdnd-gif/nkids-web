@@ -3,42 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>뉴키즈 - 학부모 전용관</title>
+    <title>뉴키즈 - 학부모 게시판</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; padding: 20px; background: #f8f9fa; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        h2 { color: #1a3c6e; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        .btn-logout { background: #666; color: #fff; padding: 5px 15px; border-radius: 5px; cursor: pointer; border: none; float: right; }
+        /* [스타일] */
+        * { box-sizing: border-box; }
+        body { font-family: 'Pretendard', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        
+        /* 헤더 영역 */
+        .board-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1a3c6e; padding-bottom: 20px; margin-bottom: 20px; }
+        .board-title { color: #1a3c6e; font-size: 1.8rem; font-weight: bold; }
+        .btn-logout { background: #666; color: #fff; padding: 8px 20px; border-radius: 5px; cursor: pointer; border: none; font-weight: bold; }
+        .btn-logout:hover { background: #444; }
+
+        /* 게시판 테이블 */
+        .board-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+        .board-table th { background: #f8f9fa; padding: 15px; border-bottom: 2px solid #ddd; color: #555; font-weight: bold; text-align: center; }
+        .board-table td { padding: 15px; border-bottom: 1px solid #eee; color: #333; text-align: center; }
+        
+        /* 제목은 왼쪽 정렬 + 클릭 가능하게 */
+        .board-table td.title-col { text-align: left; cursor: pointer; color: #1a3c6e; font-weight: 500; }
+        .board-table td.title-col:hover { text-decoration: underline; color: #f4a261; }
+        
+        /* 모바일 대응 */
+        @media (max-width: 600px) {
+            .board-table th:nth-child(1), .board-table td:nth-child(1), /* 번호 숨김 */
+            .board-table th:nth-child(3), .board-table td:nth-child(3), /* 작성자 숨김 */
+            .board-table th:nth-child(4), .board-table td:nth-child(4) { display: none; } /* 날짜 숨김 */
+            .board-title { font-size: 1.4rem; }
+        }
+
+        /* 팝업(모달) 스타일 - 글 내용 보기 */
+        #post-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fff; margin: 10% auto; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
+        .close-btn:hover { color: #000; }
+        
+        .modal-header { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-title { font-size: 1.4rem; font-weight: bold; color: #1a3c6e; margin-bottom: 10px; }
+        .modal-meta { font-size: 0.9rem; color: #888; }
+        .modal-body { line-height: 1.8; color: #333; min-height: 150px; white-space: pre-line; /* 줄바꿈 적용 */ }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <button class="btn-logout" onclick="logout()">로그아웃</button>
-        <h2>🔒 학부모 전용 게시판</h2>
-        
-        <div style="margin-top: 30px; line-height: 1.8;">
-            <p><strong>인증된 학부모님, 환영합니다!</strong></p>
-            <br>
-            <h3>📢 공지사항</h3>
-            <p>- 이번 달 식단표 안내</p>
-            <p>- 봄 소풍 가정통신문</p>
-            <br>
-            <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=600&q=60" style="width:100%; border-radius:10px;">
+        <div class="board-header">
+            <div class="board-title">📢 학부모 알림장</div>
+            <button class="btn-logout" onclick="logout()">로그아웃</button>
+        </div>
+
+        <p style="margin-bottom: 20px; color: #666;">
+            아이들의 활동 소식과 공지사항을 확인하세요. (작성된 글을 클릭하면 내용을 볼 수 있습니다.)
+        </p>
+
+        <table class="board-table">
+            <thead>
+                <tr>
+                    <th width="10%">번호</th>
+                    <th width="50%">제목</th>
+                    <th width="20%">작성자</th>
+                    <th width="20%">날짜</th>
+                </tr>
+            </thead>
+            <tbody id="board-list">
+                <tr>
+                    <td colspan="4" style="padding: 30px;">게시글을 불러오는 중입니다...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="post-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <div class="modal-title" id="m-title">제목</div>
+                <div class="modal-meta" id="m-meta">작성자 | 날짜</div>
+            </div>
+            <div class="modal-body" id="m-body">
+                내용이 여기에 나옵니다.
+            </div>
         </div>
     </div>
 
     <script>
-        // [검문 검색] 통행증(session)이 없으면 쫓아냄
+        // [1] 로그인 체크 (공용 비밀번호 방식)
         if (sessionStorage.getItem("isParent") !== "true") {
             alert("로그인이 필요합니다.");
             window.location.href = "login.html";
         }
 
+        // [2] 엑셀 게시판 데이터 주소 (★여기에 복사한 주소를 넣으세요★)
+        const BOARD_SHEET_URL = "여기에_게시판용_엑셀_CSV_주소를_넣으세요";
+
+        // [3] 게시글 불러오기 함수
+        async function loadBoard() {
+            try {
+                const response = await fetch(https://docs.google.com/spreadsheets/d/e/2PACX-1vSN8NdA-JjKfu9o4yDerh-yIRyxZwqiqWNiibSCRPfmk9DYz370uAOq_H9A1oUDLDi6olVwHAi52Qth/pub?gid=0&single=true&output=csv);
+                const data = await response.text();
+                const rows = data.split("\n").slice(1); // 첫 줄(제목) 제외
+
+                const boardList = document.getElementById('board-list');
+                boardList.innerHTML = ""; // 로딩 문구 지우기
+
+                // 최신 글이 위로 오게 (배열 뒤집기)
+                rows.reverse().forEach((row, index) => {
+                    if(row.trim() === "") return;
+
+                    // 엑셀 칸 나누기 (따옴표 처리 포함)
+                    const cols = parseCSVRow(row);
+                    
+                    // A:번호, B:제목, C:날짜, D:작성자, E:내용
+                    const no = cols[0];
+                    const title = cols[1];
+                    const date = cols[2];
+                    const writer = cols[3];
+                    const content = cols[4];
+
+                    // 테이블에 행 추가
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${no}</td>
+                        <td class="title-col" onclick="openModal('${title}', '${writer}', '${date}', \`${content}\`)">${title}</td>
+                        <td>${writer}</td>
+                        <td>${date}</td>
+                    `;
+                    boardList.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('board-list').innerHTML = `<tr><td colspan="4">게시글을 불러오지 못했습니다.</td></tr>`;
+            }
+        }
+
+        // CSV 파싱 함수 (콤마 안에 있는 콤마 처리용)
+        function parseCSVRow(row) {
+            const result = [];
+            let current = '';
+            let inQuote = false;
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                if (char === '"') { inQuote = !inQuote; }
+                else if (char === ',' && !inQuote) {
+                    result.push(current.trim()); current = '';
+                } else { current += char; }
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        // [4] 모달(팝업) 관련 함수
+        function openModal(title, writer, date, content) {
+            document.getElementById('m-title').innerText = title;
+            document.getElementById('m-meta').innerText = `작성자: ${writer} | 작성일: ${date}`;
+            
+            // 엑셀에서 줄바꿈이 깨지지 않도록 처리
+            const cleanContent = content.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
+            document.getElementById('m-body').innerText = cleanContent;
+            
+            document.getElementById('post-modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('post-modal').style.display = 'none';
+        }
+
+        // 바깥 클릭 시 닫기
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('post-modal')) {
+                closeModal();
+            }
+        }
+
         function logout() {
-            sessionStorage.removeItem("isParent"); // 통행증 파기
+            sessionStorage.removeItem("isParent");
             window.location.href = "index.html";
         }
+
+        // 페이지 시작 시 게시글 로딩
+        loadBoard();
     </script>
 
 </body>
