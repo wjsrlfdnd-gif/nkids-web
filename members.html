@@ -158,7 +158,7 @@
         // [4] 모달(팝업) 관련 함수
         function openModal(title, writer, date, content) {
             document.getElementById('m-title').innerText = title;
-            document.getElementById('m-meta').innerText = `작성자: ${writer} | 작성일: ${date}`;
+            document.getElementById('m-meta').innerText = `작성일: ${writer} | 작성자: ${date}`;
             
             // 엑셀에서 줄바꿈이 깨지지 않도록 처리
             const cleanContent = content.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
