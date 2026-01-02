@@ -5,7 +5,7 @@ const SHEET_URL = "여기에_아까_복사한_구글시트_주소를_붙여넣�
 
 // [★중요★] 여기에 사장님의 진짜 로고 이미지 주소를 넣으세요!
 // 지금은 테스트용 임시 이미지가 들어있습니다.
-const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/nkids-web/logo.png";
+const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/logo.png";
 
 
 // 기본 정보
