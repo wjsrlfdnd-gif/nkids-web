@@ -40,17 +40,13 @@ async function loadDataFromSheet() {
     }
 }
 
-// [4] 헤더(메뉴) 만들기 - ★여기에 퍼포먼스 메뉴가 추가되었습니다★
+// [4] 헤더(메뉴) 만들기 - ★모든 페이지가 이 함수를 씁니다★
 function loadHeader() {
-   // 1. 스타일 주입 (로고, 드롭다운, ★리스트 점 없애기 추가됨★)
+    // 1. 스타일 주입 (점 없애기, 드롭다운, 로고 등)
     const style = document.createElement('style');
     style.innerHTML = `
-        /* [핵심] 모든 메뉴의 점(bullet) 없애기 & 여백 초기화 */
-        ul.nav-menu, ul.dropdown { 
-            list-style: none !important; 
-            margin: 0; 
-            padding: 0; 
-        }
+        /* [핵심] 리스트 점(bullet) 없애기 & 여백 초기화 */
+        ul.nav-menu, ul.dropdown { list-style: none !important; margin: 0; padding: 0; }
 
         /* 드롭다운 스타일 */
         .nav-menu li { position: relative; padding: 10px 0; }
@@ -63,62 +59,70 @@ function loadHeader() {
         .nav-menu li:hover .dropdown { display: block; }
         .dropdown li a {
             display: block; padding: 12px 20px; font-size: 0.95rem; color: #555;
-            text-align: center; white-space: nowrap; transition: 0.2s;
+            text-align: center; white-space: nowrap; transition: 0.2s; text-decoration: none;
         }
         .dropdown li a:hover { background-color: #f8f9fa; color: #f4a261; font-weight: bold; }
         
+        /* 로고 스타일 */
         .logo-link { display: flex; align-items: center; height: 100%; }
         .logo-img { max-height: 50px; width: auto; display: block; }
 
+        /* 모바일 대응 */
         @media (max-width: 768px) { .dropdown { display: none !important; } }
     `;
     document.head.appendChild(style);
 
-    // 2. 헤더 HTML 교체
-    document.querySelector('header').innerHTML = `
-        <div class="container header-inner">
-            <a href="index.html" class="logo-link">
-                <img src="${LOGO_IMAGE_URL}" alt="NEW KIDS 로고" class="logo-img">
-            </a>
+    // 2. 헤더 HTML 교체 (여기가 바뀌면 모든 페이지가 바뀝니다)
+    const headerEl = document.querySelector('header');
+    if(headerEl) {
+        headerEl.innerHTML = `
+            <div class="container header-inner">
+                <a href="index.html" class="logo-link">
+                    <img src="${LOGO_IMAGE_URL}" alt="NEW KIDS" class="logo-img">
+                </a>
 
-            <ul class="nav-menu">
-                <li><a href="index.html">홈으로</a></li>
-                
-                <li>
-                    <a href="index.html#services" style="cursor:default;">교재소개 ▾</a>
-                    <ul class="dropdown">
-                        <li><a href="infant.html">👶 영아반 (Standard)</a></li>
-                        <li><a href="child.html">🧒 유아반 (Premium)</a></li>
-                    </ul>
-                </li>
+                <ul class="nav-menu">
+                    <li><a href="index.html">홈으로</a></li>
+                    
+                    <li>
+                        <a href="index.html#services" style="cursor:default;">교재소개 ▾</a>
+                        <ul class="dropdown">
+                            <li><a href="infant.html">👶 영아반 (Standard)</a></li>
+                            <li><a href="child.html">🧒 유아반 (Premium)</a></li>
+                        </ul>
+                    </li>
 
-                <li>
-                    <a href="index.html#events" style="cursor:default;">행사프로그램 ▾</a>
-                    <ul class="dropdown">
-                        <li><a href="season.html">🎉 시즌 테마 행사</a></li>
-                        <li><a href="culture.html">🌍 원어민 문화 체험</a></li>
-                        <li><a href="performance.html">🤹 오감 퍼포먼스</a></li>
-                    </ul>
-                </li>
+                    <li>
+                        <a href="index.html#events" style="cursor:default;">행사프로그램 ▾</a>
+                        <ul class="dropdown">
+                            <li><a href="season.html">🎉 시즌 테마 행사</a></li>
+                            <li><a href="culture.html">🌍 원어민 문화 체험</a></li>
+                            <li><a href="performance.html">🤹 오감 퍼포먼스</a></li>
+                        </ul>
+                    </li>
 
-                <li><a href="proposal.html" style="color:#1a3c6e; font-weight:bold;">견적요청</a></li>
-                
+                    <li><a href="proposal.html" style="color:#1a3c6e; font-weight:bold;">견적요청</a></li>
+                    
                 </ul>
-        </div>
-    `;
+            </div>
+        `;
+    }
 }
 
 // [5] 푸터(하단 정보) 만들기
 function loadFooter() {
-    document.querySelector('footer').innerHTML = `
-        <div class="container">
-            <p>(주)뉴키즈 | 대표: <span id="info_ceo">${DEFAULT_INFO.ceo}</span></p>
-            <p>주소: <span id="info_address">${DEFAULT_INFO.address}</span></p>
-            <p>문의: <span id="info_phone">${DEFAULT_INFO.phone}</span></p>
-            <br>
-            <p>&copy; 2026 New Kids. All rights reserved.</p>
-        </div>
-    `;
+    const footerEl = document.querySelector('footer');
+    if(footerEl) {
+        footerEl.innerHTML = `
+            <div class="container">
+                <p>(주)뉴키즈 | 대표: <span id="info_ceo">${DEFAULT_INFO.ceo}</span></p>
+                <p>주소: <span id="info_address">${DEFAULT_INFO.address}</span></p>
+                <p>문의: <span id="info_phone">${DEFAULT_INFO.phone}</span></p>
+                <br>
+                <p>&copy; 2026 New Kids. All rights reserved.</p>
+            </div>
+        `;
+    }
 }
 
 // [6] 실행
@@ -127,6 +131,7 @@ document.addEventListener("DOMContentLoaded", function() {
     loadFooter();
     loadDataFromSheet(); 
     
+    // 전화번호 링크 자동 변환
     setTimeout(() => {
         const phoneTxt = document.getElementById('info_phone') ? document.getElementById('info_phone').innerText : DEFAULT_INFO.phone;
         const callBtns = document.querySelectorAll('a[href^="tel:"]');
