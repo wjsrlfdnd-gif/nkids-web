@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴키즈 - AI 한글 상세소개</title>
+    <style>
+        /* [기본 스타일 및 변수] */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Pretendard', sans-serif; color: #333; line-height: 1.6; background: #fff; }
+        a { text-decoration: none; color: inherit; }
+        
+        :root { 
+            --primary-color: #1a3c6e; 
+            --accent-color: #f4a261; 
+            --tech-color: #4cc9f0; /* AI 느낌을 주는 밝은 하늘색 */
+            --bg-light: #f8f9fa; 
+        }
+        
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+        section { padding: 80px 0; }
+        h2 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary-color); font-weight: 700; }
+        .section-desc { text-align: center; color: #666; margin-bottom: 50px; font-size: 1.1rem; }
+        
+        .btn { display: inline-block; padding: 12px 30px; background-color: var(--accent-color); color: #fff; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background-color: #e76f51; }
+
+        /* [서브 배너] */
+        .sub-hero {
+            height: 400px;
+            /* 태블릿/스마트 학습 이미지 */
+            background: linear-gradient(rgba(26,60,110,0.8), rgba(26,60,110,0.8)), url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
+            background-size: cover;
+            display: flex; align-items: center; justify-content: center; text-align: center; color: #fff; margin-top: 70px;
+        }
+        .sub-hero h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+        .sub-hero p { font-size: 1.4rem; color: #ffdca8; font-weight: 600; }
+        .badge-ai { background: var(--tech-color); color: #fff; padding: 5px 15px; border-radius: 20px; font-size: 1rem; margin-bottom: 15px; display: inline-block; font-weight: bold; }
+
+        /* [1. 핵심 기능 3가지] */
+        .feature-box { display: flex; gap: 30px; text-align: center; }
+        .f-item { flex: 1; padding: 40px 30px; background: #fff; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; transition: 0.3s; }
+        .f-item:hover { transform: translateY(-10px); border-color: var(--tech-color); }
+        .f-icon { font-size: 3.5rem; margin-bottom: 20px; display: block; }
+        .f-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 15px; color: var(--primary-color); }
+        .f-desc { color: #666; font-size: 1rem; line-height: 1.6; }
+
+        /* [2. 구성품 소개] */
+        .component-section { background-color: var(--bg-light); }
+        .comp-wrapper { display: flex; align-items: center; gap: 50px; }
+        .comp-img { flex: 1; height: 400px; background-color: #ddd; border-radius: 15px; background-image: url('https://images.unsplash.com/photo-1550592704-6c76defa9985?auto=format&fit=crop&w=800&q=60'); background-size: cover; background-position: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .comp-text { flex: 1; }
+        .comp-list li { margin-bottom: 15px; font-size: 1.1rem; list-style: none; display: flex; align-items: center; }
+        .comp-list li::before { content: "✅"; margin-right: 10px; font-size: 1.2rem; }
+        
+        /* [3. 학습 프로세스] */
+        .process-steps { display: flex; justify-content: space-between; margin-top: 40px; position: relative; }
+        .step-item { flex: 1; text-align: center; position: relative; z-index: 2; }
+        .step-circle { width: 80px; height: 80px; background: var(--primary-color); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px; font-weight: bold; box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
+        .step-line { position: absolute; top: 40px; left: 0; width: 100%; height: 3px; background: #ddd; z-index: 1; }
+        
+        @media (max-width: 768px) {
+            .feature-box, .comp-wrapper, .process-steps { flex-direction: column; }
+            .step-line { display: none; }
+            .step-item { margin-bottom: 30px; }
+            .sub-hero h1 { font-size: 2.2rem; }
+        }
+
+        footer { background: #222; color: #888; padding: 40px 0; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header></header>
+
+    <section class="sub-hero">
+        <div class="container">
+            <span class="badge-ai">Smart Learning</span>
+            <h1>AI 한글</h1>
+            <p>디지털 소리펜과 AI 분석으로<br>아이의 언어 습관을 잡아주는 미래형 한글 교육</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>왜 'AI 한글'인가요?</h2>
+            <p class="section-desc">단순히 읽는 책이 아닙니다. 듣고, 말하고, 반응하는 살아있는 한글입니다.</p>
+            
+            <div class="feature-box">
+                <div class="f-item">
+                    <span class="f-icon">🖊️</span>
+                    <h3 class="f-title">콕! 찍으면 소리가 술술</h3>
+                    <p class="f-desc">글자를 아직 모르는 아이도 소리펜으로 그림과 글자를 찍으며 스스로 이야기를 듣습니다. 청각적 자극을 통해 어휘력을 폭발적으로 성장시킵니다.</p>
+                </div>
+                <div class="f-item">
+                    <span class="f-icon">🎤</span>
+                    <h3 class="f-title">말하면 분석하는 AI</h3>
+                    <p class="f-desc">아이가 단어를 따라 말하면 AI가 발음을 분석하고 칭찬해 줍니다. 부끄러움 없이 원어민 발음과 나의 발음을 비교하며 자신감을 키웁니다.</p>
+                </div>
+                <div class="f-item">
+                    <span class="f-icon">📊</span>
+                    <h3 class="f-title">1:1 맞춤 학습 리포트</h3>
+                    <p class="f-desc">우리 아이가 어떤 단어를 많이 익혔는지, 학습 시간은 얼마나 되는지 데이터로 분석하여 선생님과 부모님께 리포트를 제공합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="component-section">
+        <div class="container">
+            <h2>풍성한 교재 구성</h2>
+            <div class="comp-wrapper">
+                <div class="comp-img"></div>
+                <div class="comp-text">
+                    <ul class="comp-list">
+                        <li><strong>스마트 스토리북 (매월 1권):</strong><br>소리펜이 적용된 특수 인쇄 그림책</li>
+                        <li><strong>AI 소리펜 (개인별 지급):</strong><br>녹음 및 재생 기능이 탑재된 전용 펜</li>
+                        <li><strong>워크북 & 붙임딱지:</strong><br>배운 내용을 손으로 쓰고 붙이며 복습</li>
+                        <li><strong>학부모 전용 앱(App):</strong><br>아이의 학습 현황을 실시간으로 확인</li>
+                    </ul>
+                    <div style="margin-top: 30px;">
+                        <a href="proposal.html" class="btn">교재 샘플 신청하기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>3단계 학습 시스템</h2>
+            <p class="section-desc">놀이처럼 시작해서 완벽한 습득까지</p>
+            
+            <div class="process-steps">
+                <div class="step-line"></div> <div class="step-item">
+                    <div class="step-circle">1</div>
+                    <h3>듣기 (Input)</h3>
+                    <p>재미있는 동화를 소리펜으로 찍으며<br>다양한 어휘와 문장을 듣습니다.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle">2</div>
+                    <h3>말하기 (Output)</h3>
+                    <p>등장인물의 대사를 따라 하고<br>녹음하며 입을 엽니다.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle">3</div>
+                    <h3>피드백 (Check)</h3>
+                    <p>AI가 발음을 분석하고<br>학습 데이터를 기록합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="text-align: center; background-color: var(--primary-color); color: #fff;">
+        <div class="container">
+            <h2 style="color: #fff;">AI 한글, 직접 체험해 보세요!</h2>
+            <p style="margin-bottom: 20px;">원장님께 시연용 태블릿과 소리펜을 가지고 방문드립니다.</p>
+            <a href="proposal.html" class="btn" style="background: #fff; color: var(--primary-color);">📞 방문 시연 요청하기</a>
+        </div>
+    </section>
+
+    <footer></footer>
+
+    <script src="manager.js"></script>
+
+</body>
+</html>

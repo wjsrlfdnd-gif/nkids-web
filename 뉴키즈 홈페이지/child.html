@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴키즈 - 유아반 프로그램</title>
+    <style>
+        /* [기본 스타일] */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Pretendard', sans-serif; color: #333; line-height: 1.6; background: #fff; }
+        a { text-decoration: none; color: inherit; }
+        
+        :root { --primary-color: #1a3c6e; --accent-color: #f4a261; --bg-light: #f8f9fa; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+        section { padding: 80px 0; }
+        h2 { font-size: 2.2rem; text-align: center; margin-bottom: 40px; color: var(--primary-color); font-weight: 700; }
+        .btn { display: inline-block; padding: 12px 30px; background-color: var(--accent-color); color: #fff; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background-color: #e76f51; }
+        
+        header { width: 100%; height: 70px; background-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: fixed; top: 0; z-index: 1000; }
+        .header-inner { display: flex; justify-content: space-between; align-items: center; height: 100%; }
+        .logo { font-size: 1.5rem; font-weight: 900; color: var(--primary-color); }
+        .nav-menu { display: flex; gap: 30px; } /* 메뉴 추가 */
+        .nav-menu li a:hover { color: var(--accent-color); }
+
+        /* [서브 배너 (가독성 강화)] */
+        .sub-hero {
+            height: 350px;
+            /* 배경 어둡게 처리 */
+            background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
+            background-size: cover;
+            display: flex; align-items: center; justify-content: center; text-align: center; color: #fff; margin-top: 70px;
+        }
+        .sub-hero h1 { font-size: 3.2rem; font-weight: 800; margin-bottom: 20px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: -1px; }
+        .sub-hero p { font-size: 1.4rem; font-weight: 600; color: #ffdca8; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+
+       /* [과목별 배지 스타일] */
+        .subject-badge { display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: bold; color: #fff; margin-bottom: 15px; font-size: 0.9rem; }
+        
+        .bg-nuri { background-color: #2a9d8f; }     /* 누리/인성 - 청록 */
+        .bg-english { background-color: #1a3c6e; }  /* 영어 - 네이비 */
+        .bg-coding { background-color: #7209b7; }   /* 코딩 - 보라 */
+        .bg-book { background-color: #e63946; }     /* 독서 - 빨강 */
+        .bg-science { background-color: #457b9d; }  /* 과학 - 파랑 */
+        .bg-art { background-color: #f4a261; }      /* 미술 - 오렌지 */
+
+        /* [상품 카드 그리드] */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        
+        .product-card { 
+            background: #fff; border-radius: 15px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--accent-color); }
+        
+        .product-img { width: 100%; height: 200px; background-color: #ddd; background-size: cover; background-position: center; }
+        .product-info { padding: 30px; flex: 1; display: flex; flex-direction: column; }
+        .product-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; color: #333; }
+        .product-desc { color: #666; font-size: 0.95rem; margin-bottom: 15px; line-height: 1.5; flex: 1; }
+        .product-features { background: #f9f9f9; padding: 15px; border-radius: 8px; font-size: 0.85rem; color: #555; list-style: none; }
+        .product-features li::before { content: "✔"; color: var(--accent-color); margin-right: 5px; }
+
+        @media (max-width: 768px) { .sub-hero h1 { font-size: 2.2rem; } }
+        footer { background: #222; color: #888; padding: 40px 0; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+    </header>
+
+   <section class="sub-hero">
+        <div class="container">
+            <h1>유아반 교재 라인업</h1>
+            <p>누리과정부터 미래형 코딩 교육까지,<br>생각하는 힘을 기르는 창의 융합 프로그램</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>마음이 자라는 누리과정</h2>
+            <p class="section-desc">바른 인성과 사회성을 기르는 유아 필수 교육</p>
+            
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-nuri">사회정서 발달</span>
+                        <h3 class="product-title">💖 마음빛깔</h3>
+                        <p class="product-desc">나의 감정을 이해하고 친구와 소통하는 법을 배웁니다. 누리과정 5개 영역을 기반으로 한 인성 동화 프로그램입니다.</p>
+                        <ul class="product-features">
+                            <li>감정 표현 및 조절 능력 향상</li>
+                            <li>사회적 관계 형성 훈련</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-nuri">프로젝트 활동</span>
+                        <h3 class="product-title">🌱 세힘 (세상을 이끄는 힘)</h3>
+                        <p class="product-desc">아이들이 주도적으로 주제를 탐구하고 해결책을 찾아가는 프로젝트형 누리과정 심화 활동입니다.</p>
+                        <ul class="product-features">
+                            <li>문제 해결력과 자기주도성</li>
+                            <li>협동 학습 및 토론 활동</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background-color: var(--bg-light);">
+        <div class="container">
+            <h2>글로벌 리더 영어</h2>
+            <p class="section-desc">말하기, 읽기, 쓰기가 즐거워지는 통합 영어</p>
+            
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1564591787168-98440751d8b6?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-english">액티비티 영어</span>
+                        <h3 class="product-title">🏃 레디셋 (Ready Set)</h3>
+                        <p class="product-desc">신체 활동과 게임으로 배우는 영어! 영어에 대한 거부감을 없애고 몸으로 익히는 즐거운 수업입니다.</p>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-english">스토리텔링</span>
+                        <h3 class="product-title">📖 스토릭스 (Storix)</h3>
+                        <p class="product-desc">명작 동화와 창작 동화를 영어로 읽으며 문해력을 키웁니다. 드라마(연극) 활동으로 표현력을 극대화합니다.</p>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-english">통합 영어</span>
+                        <h3 class="product-title">🎶 STTW</h3>
+                        <p class="product-desc">Sing, Talk, Touch, Write! 노래하고 말하고 만지고 쓰며 오감을 총동원해 영어를 모국어처럼 습득합니다.</p>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-english">스마트 영어</span>
+                        <h3 class="product-title">🦋 윙스 (Wings)</h3>
+                        <p class="product-desc">패드(Pad) 기반의 인터랙티브 학습! 애니메이션과 게임을 통해 파닉스부터 회화까지 체계적으로 완성합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>미래형 인재 코딩</h2>
+            <p class="section-desc">논리적 사고력을 키우는 디지털 문해력 교육</p>
+            
+            <div class="product-grid" style="justify-content: center;">
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1555435024-2c3d85c9b46e?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-coding">언플러그드 코딩</span>
+                        <h3 class="product-title">🤖 비누코딩 (Binu)</h3>
+                        <p class="product-desc">컴퓨터 없이 배우는 코딩! 귀여운 로봇과 교구를 활용해 순차, 반복, 조건 등 프로그래밍의 기초 원리를 놀이로 배웁니다.</p>
+                        <ul class="product-features">
+                            <li>논리적 사고(Computational Thinking)</li>
+                            <li>문제 해결 및 창의적 설계</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background-color: var(--bg-light);">
+        <div class="container">
+            <h2>생각이 깊어지는 독서</h2>
+            <p class="section-desc">책 읽는 습관과 어휘력을 길러주는 문해력 프로그램</p>
+            
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-book">독서 토론</span>
+                        <h3 class="product-title">📚 책보플러스</h3>
+                        <p class="product-desc">그림책을 읽고 친구들과 생각을 나누며 사고를 확장합니다. 독후 활동을 통해 책 내용을 내 것으로 만듭니다.</p>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-book">독서 습관</span>
+                        <h3 class="product-title">🦉 부엉이북클럽</h3>
+                        <p class="product-desc">매주 새로운 책을 만나는 즐거움! 엄선된 양서를 가정으로 대여하여 온 가족이 함께 읽는 독서 문화를 만듭니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>창의 융합 과학</h2>
+            <p class="section-desc">호기심을 해결하고 원리를 깨치는 탐구 활동</p>
+            
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1564325724739-bae0bd08762c?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-science">실험 과학</span>
+                        <h3 class="product-title"⚗️ 두잉과학</h3>
+                        <p class="product-desc">"Doing!" 직접 해보는 실험 과학. 물리, 화학, 생물 등 기초 과학 원리를 안전한 실험 키트로 체험합니다.</p>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-science">탐구 과학</span>
+                        <h3 class="product-title">💡 안다과학</h3>
+                        <p class="product-desc">일상 속 궁금증을 해결하는 생활 과학. 관찰하고 기록하며 과학적 탐구 자세를 기릅니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background-color: var(--bg-light);">
+        <div class="container">
+            <h2>꿈을 그리는 미술</h2>
+            <p class="section-desc">다양한 재료로 표현하는 나만의 예술 세계</p>
+            
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1596464716127-f9a0859b4bce?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-art">퍼포먼스</span>
+                        <h3 class="product-title">🎨 펀아트 (Fun Art)</h3>
+                        <p class="product-desc">온몸으로 즐기는 오감 미술! 틀에 박힌 그림이 아닌, 재료를 탐색하고 자유롭게 표현하는 창의 미술입니다.</p>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=500&q=60');"></div>
+                    <div class="product-info">
+                        <span class="subject-badge bg-art">조형/만들기</span>
+                        <h3 class="product-title">✂️ 메이커아트 (Maker Art)</h3>
+                        <p class="product-desc">뚝딱뚝딱 만들기 대장! 입체 조형물을 만들며 공간 지각력과 소근육을 발달시키는 메이커 교육입니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="text-align: center; background-color: var(--primary-color); color: #fff;">
+        <div class="container">
+            <h2 style="color: #fff;">이 모든 교재의 샘플을 확인하고 싶으신가요?</h2>
+            <p style="margin-bottom: 20px;">원장님께 딱 맞는 교재 구성을 제안해 드립니다.</p>
+            <a href="proposal.html" class="btn" style="background: #fff; color: var(--primary-color);">📋 견적 및 샘플 신청</a>
+        </div>
+    </section>
+
+    <footer></footer>
+
+    <script src="manager.js"></script>
+
+</body>
+</html>

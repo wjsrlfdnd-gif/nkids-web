@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴키즈 - 로그인</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f0f2f5;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0;
+        }
+        .login-box {
+            background: white; padding: 50px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center;
+            max-width: 400px; width: 100%;
+        }
+        .logo { font-size: 2rem; font-weight: 900; color: #1a3c6e; margin-bottom: 20px; display:block;}
+        p { color: #666; margin-bottom: 30px; }
+        
+        .btn-login {
+            background-color: #1a3c6e; color: white; padding: 15px 30px;
+            border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; width: 100%; transition: 0.3s;
+        }
+        .btn-login:hover { background-color: #132b4f; }
+        .btn-home { 
+            margin-top: 20px; display: inline-block; color: #888; font-size: 0.9rem; text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <a href="index.html" class="logo">NEW KIDS</a>
+                <p>공지사항을 확인하려면 로그인해주세요.</p>
+
+        <button class="btn-login" onclick="netlifyIdentity.open()">로그인 / 회원가입</button>
+        
+        <br>
+        <a href="index.html" class="btn-home">홈으로 돌아가기</a>
+    </div>
+
+    <script>
+        // 페이지가 열리면 위젯 초기화
+        document.addEventListener("DOMContentLoaded", function() {
+            netlifyIdentity.init();
+        });
+
+        // 로그인 성공 시 'members.html'로 이동!
+        netlifyIdentity.on("login", user => {
+            alert(user.user_metadata.full_name + "님 환영합니다!");
+            window.location.href = "members.html"; 
+            netlifyIdentity.close();
+        });
+    </script>
+
+</body>
+</html>

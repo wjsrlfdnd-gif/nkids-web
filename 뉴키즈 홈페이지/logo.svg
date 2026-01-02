@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50">
+  <rect x="10" y="10" width="30" height="30" rx="5" fill="#f4a261" />
+  <circle cx="18" cy="20" r="2" fill="#fff" />
+  <circle cx="32" cy="20" r="2" fill="#fff" />
+  <path d="M 18 28 Q 25 35 32 28" stroke="#fff" stroke-width="2" fill="none" />
+
+  <text x="50" y="33" font-family="Arial, sans-serif" font-weight="900" font-size="24" fill="#1a3c6e">NEW</text>
+  
+  <text x="110" y="33" font-family="Arial, sans-serif" font-weight="900" font-size="24" fill="#1a3c6e">KIDS</text>
+  
+  <circle cx="175" cy="33" r="3" fill="#f4a261" />
+</svg>

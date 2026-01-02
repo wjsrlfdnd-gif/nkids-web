@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴키즈 - 학부모 전용관</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <style>
+        /* 간단한 스타일 */
+        body { font-family: 'Pretendard', sans-serif; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        h2 { color: #1a3c6e; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+        .btn-logout { background: #666; color: #fff; padding: 5px 15px; border-radius: 5px; cursor: pointer; border: none; float: right; }
+        .secret-content { margin-top: 30px; line-height: 1.8; }
+        .notice-item { background: #f1f8ff; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 5px solid #1a3c6e; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <button class="btn-logout" onclick="logout()">로그아웃</button>
+        <h2>🔒 학부모 전용 게시판</h2>
+        
+        <div id="content" class="secret-content">
+            <p><strong>반갑습니다! <span id="username">학부모</span>님.</strong></p>
+            <p>이곳은 인증된 학부모님만 볼 수 있는 공간입니다.</p>
+            <br>
+            
+            <h3>📢 이번 주 공지사항</h3>
+            <div class="notice-item">
+                <strong>[식단표]</strong> 1월 유기농 식단표가 업로드되었습니다.
+            </div>
+            <div class="notice-item">
+                <strong>[행사안내]</strong> 다음 주 금요일은 '빙어축제'가 열립니다. 따뜻하게 입혀 보내주세요.
+            </div>
+
+            <br>
+            <h3>📷 활동 사진</h3>
+            <p>(여기에 사진을 넣으시면 됩니다)</p>
+            <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=600&q=60" style="width:100%; border-radius:10px; margin-top:10px;">
+        </div>
+    </div>
+
+    <script>
+        // [중요] 로그인 체크! (문지기 역할)
+        const user = netlifyIdentity.currentUser();
+
+        if (!user) {
+            // 로그인을 안 했으면 로그인 페이지로 쫓아냄
+            alert("로그인이 필요한 페이지입니다.");
+            window.location.href = "login.html";
+        } else {
+            // 로그인 했으면 이름 보여주기
+            document.getElementById('username').innerText = user.user_metadata.full_name;
+        }
+
+        function logout() {
+            netlifyIdentity.logout();
+            window.location.href = "index.html";
+        }
+    </script>
+
+</body>
+</html>
