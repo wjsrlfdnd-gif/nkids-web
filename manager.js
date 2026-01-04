@@ -1,8 +1,5 @@
-// manager.js - 통합 관리자 (Footer 디자인까지 완벽 통합)
+// manager.js - 통합 관리자 (화면 터치 시 메뉴 닫힘 기능 추가)
 
-// ============================================================
-// [1] 설정 및 상수 정의
-// ============================================================
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbz68tFmFB7IuCEhLIgnm4RMuqiYlXzdgqDVikGFOODFVuh9wXfdOL4aZ4VFy-7HAsVPjQ/exec";
 const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/nkids-web/logo.png";
 
@@ -13,18 +10,7 @@ const DEFAULT_INFO = {
     phone: "010-2333-2563 / 010-5522-8109"
 };
 
-// ★ Supabase 설정
-const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
-
-window.sb = null;
-if (typeof supabase !== 'undefined') {
-    window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-}
-
-// ============================================================
-// [2] 초기화 및 데이터 로딩
-// ============================================================
+// [0] 초기화: 뷰포트 메타태그 자동 삽입
 (function initViewport() {
     if (!document.querySelector('meta[name="viewport"]')) {
         const meta = document.createElement('meta');
@@ -34,6 +20,7 @@ if (typeof supabase !== 'undefined') {
     }
 })();
 
+// [1] 데이터 로딩
 async function loadDataFromSheet() {
     try {
         const response = await fetch(SHEET_URL);
@@ -50,9 +37,7 @@ async function loadDataFromSheet() {
     } catch (error) { console.error("엑셀 연동 실패:", error); }
 }
 
-// ============================================================
-// [3] 헤더/푸터 및 스타일 생성 (여기에 Footer 디자인 추가됨)
-// ============================================================
+// [2] 헤더 및 전체 반응형 스타일 로드
 function loadHeader() {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -63,15 +48,12 @@ function loadHeader() {
             font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
             font-size: 16px; color: #333; line-height: 1.6;
             overflow-x: hidden; padding-top: 70px;
-            display: flex; flex-direction: column; min-height: 100vh; /* 푸터 하단 고정용 */
         }
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
         img { max-width: 100%; height: auto; }
         .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; width: 100%; }
-        section { padding: clamp(40px, 8vw, 80px) 0; } /* 기본 섹션 여백 */
-        
-        /* 폰트/버튼 */
+        section { padding: clamp(40px, 8vw, 80px) 0; }
         h1 { font-size: clamp(2rem, 5vw, 3.5rem) !important; line-height: 1.3; margin-bottom: 20px; }
         h2 { font-size: clamp(1.8rem, 4vw, 2.4rem) !important; margin-bottom: 30px; color: var(--primary-color); }
         h3 { font-size: clamp(1.3rem, 3vw, 1.8rem) !important; margin-bottom: 15px; }
@@ -83,11 +65,14 @@ function loadHeader() {
             text-align: center; border: none; cursor: pointer;
         }
         .btn:hover { background-color: #e76f51; }
-        .card-grid, .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .card-grid, .gallery-grid, .event-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
 
         /* [B] 헤더 스타일 */
         header { width: 100%; height: 70px; background-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: fixed; top: 0; left: 0; z-index: 9999; }
         .header-inner { display: flex; justify-content: space-between; align-items: center; height: 100%; max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+        .logo-link { display: flex; align-items: center; height: 100%; }
         .logo-img { max-height: 45px; width: auto; }
         ul.nav-menu { display: flex; gap: 30px; }
         .nav-menu > li { position: relative; padding: 20px 0; }
@@ -99,7 +84,7 @@ function loadHeader() {
         .dropdown li a:hover { background: #f8f9fa; color: #f4a261; font-weight: bold; }
         .mobile-btn { display: none; font-size: 1.8rem; background: none; border: none; cursor: pointer; color: #1a3c6e; padding: 10px; }
 
-        /* [C] 모바일 헤더 */
+        /* [C] 모바일 스타일 */
         @media (max-width: 768px) {
             .mobile-btn { display: block !important; }
             .nav-menu { display: none !important; flex-direction: column; position: absolute; top: 70px; left: 0; width: 100%; background: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-top: 1px solid #eee; padding: 0; gap: 0; }
@@ -108,20 +93,11 @@ function loadHeader() {
             .nav-menu > li > a { display: block; padding: 15px 0; width: 100%; }
             .dropdown { display: none !important; position: static; transform: none; box-shadow: none; border: none; background: #f8f9fa; width: 100%; margin: 0; }
             .sub-open .dropdown { display: block !important; }
+            .sub-open > a { color: #f4a261; font-weight: bold; background: #fffbf5; }
             .btn { width: 100%; display: block; margin-top: 10px; }
         }
-
-        /* [★중요★] Footer 통합 스타일 */
-        footer {
-            background-color: #222;
-            color: #888;
-            padding: 40px 0;
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: auto; /* 내용이 적어도 항상 바닥에 */
-        }
-        footer p { margin-bottom: 8px; color: #888; }
-        footer .container { padding: 0 20px; }
+        .highlight-menu { color: #1a3c6e !important; font-weight: 700 !important; }
+        .cta-menu { color: #e76f51 !important; font-weight: 700 !important; }
     `;
     document.head.appendChild(style);
 
@@ -129,16 +105,32 @@ function loadHeader() {
     if (headerEl) {
         headerEl.innerHTML = `
             <div class="header-inner">
-                <a href="index.html" class="logo-link"><img src="${LOGO_IMAGE_URL}" alt="NEW KIDS" class="logo-img"></a>
+                <a href="index.html" class="logo-link">
+                    <img src="${LOGO_IMAGE_URL}" alt="NEW KIDS" class="logo-img">
+                </a>
+
                 <button class="mobile-btn" onclick="window.toggleMenu()">☰</button>
+
                 <ul class="nav-menu" id="navMenu">
                     <li><a href="index.html">홈으로</a></li>
-                    <li><a href="javascript:void(0)" onclick="window.toggleSubMenu(this)">교재소개 ▾</a>
-                        <ul class="dropdown"><li><a href="infant.html">👶 영아반</a></li><li><a href="child.html">🧒 유아반</a></li></ul>
+                    
+                    <li>
+                        <a href="javascript:void(0)" onclick="window.toggleSubMenu(this)">교재소개 ▾</a>
+                        <ul class="dropdown">
+                            <li><a href="infant.html">👶 영아반 (Standard)</a></li>
+                            <li><a href="child.html">🧒 유아반 (Premium)</a></li>
+                        </ul>
                     </li>
-                    <li><a href="javascript:void(0)" onclick="window.toggleSubMenu(this)">행사프로그램 ▾</a>
-                        <ul class="dropdown"><li><a href="season.html">🎉 시즌 테마</a></li><li><a href="culture.html">🌍 원어민 문화</a></li><li><a href="performance.html">🤹 오감 퍼포먼스</a></li></ul>
+
+                    <li>
+                        <a href="javascript:void(0)" onclick="window.toggleSubMenu(this)">행사프로그램 ▾</a>
+                        <ul class="dropdown">
+                            <li><a href="season.html">🎉 시즌 테마 행사</a></li>
+                            <li><a href="culture.html">🌍 원어민 문화 체험</a></li>
+                            <li><a href="performance.html">🤹 오감 퍼포먼스</a></li>
+                        </ul>
                     </li>
+
                     <li><a href="proposal.html" class="cta-menu">견적요청</a></li>
                 </ul>
             </div>
@@ -146,9 +138,20 @@ function loadHeader() {
     }
 }
 
-window.toggleMenu = function () { const menu = document.getElementById('navMenu'); if (menu) menu.classList.toggle('active'); };
-window.toggleSubMenu = function (el) { if (window.innerWidth <= 768) { el.parentElement.classList.toggle('sub-open'); } };
+// [핵심 기능 1] 메뉴 토글
+window.toggleMenu = function () {
+    const menu = document.getElementById('navMenu');
+    if (menu) menu.classList.toggle('active');
+};
 
+// [핵심 기능 2] 서브 메뉴 토글
+window.toggleSubMenu = function (element) {
+    if (window.innerWidth <= 768) {
+        element.parentElement.classList.toggle('sub-open');
+    }
+};
+
+// [3] 푸터 생성
 function loadFooter() {
     const footerEl = document.querySelector('footer');
     if (footerEl) {
@@ -158,79 +161,36 @@ function loadFooter() {
                 <p>주소: <span id="info_address">${DEFAULT_INFO.address}</span></p>
                 <p>문의: <span id="info_phone">${DEFAULT_INFO.phone}</span></p>
                 <br>
-                <p onclick="handleAdminLogin()" style="cursor:pointer; user-select:none;">&copy; 2026 New Kids. All rights reserved.</p>
+                <p>&copy; 2026 New Kids. All rights reserved.</p>
             </div>
         `;
     }
 }
 
-/* [팝업(모달) 스타일] */
-.modal - overlay {
-    display: none; /* 평소엔 숨김 */
-    position: fixed; top: 0; left: 0; width: 100 %; height: 100 %;
-    background: rgba(0, 0, 0, 0.7); z - index: 10000;
-    justify - content: center; align - items: center;
-}
-.modal - content {
-    background: white; width: 90 %; max - width: 600px; max - height: 90vh;
-    border - radius: 15px; overflow - y: auto; position: relative;
-    animation: slideUp 0.3s ease - out;
-}
-@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-.modal - header { position: relative; }
-.modal - img { width: 100 %; height: auto; display: block; }
-.close - btn {
-    position: absolute; top: 15px; right: 15px;
-    background: rgba(0, 0, 0, 0.5); color: white; border: none;
-    width: 30px; height: 30px; border - radius: 50 %; font - size: 20px;
-    cursor: pointer; display: flex; align - items: center; justify - content: center;
-}
-.modal - body { padding: 30px; }
-.modal - title { font - size: 1.5rem; font - weight: bold; margin - bottom: 15px; color: var(--primary - color); }
-.modal - text { font - size: 1rem; color: #444; white - space: pre - wrap; line - height: 1.7; }
-.modal - date { margin - top: 20px; font - size: 0.85rem; color: #999; text - align: right; border - top: 1px solid #eee; padding - top: 10px; }
-
-/* 카드에 커서 손가락 모양 추가 */
-.card { cursor: pointer; }
-
-// [4] 관리자 로그인 함수
-let clickCount = 0;
-window.handleAdminLogin = async function () {
-    clickCount++;
-    if (clickCount >= 5) {
-        clickCount = 0;
-        if (!window.sb) { alert("Supabase 연결 실패"); return; }
-        const { data: { session } } = await window.sb.auth.getSession();
-        if (session) {
-            if (confirm("로그아웃 하시겠습니까?")) { await window.sb.auth.signOut(); location.reload(); }
-        } else {
-            const email = prompt("관리자 이메일:");
-            const password = prompt("비밀번호:");
-            if (email && password) {
-                const { error } = await window.sb.auth.signInWithPassword({ email, password });
-                if (error) alert("실패: " + error.message);
-                else location.reload();
-            }
-        }
-    }
-};
-
+// [4] 실행 및 이벤트 등록
 document.addEventListener("DOMContentLoaded", function () {
     loadHeader();
     loadFooter();
     loadDataFromSheet();
+
+    // 전화번호 자동 링크 연결
     setTimeout(() => {
         const phoneTxt = document.getElementById('info_phone') ? document.getElementById('info_phone').innerText : DEFAULT_INFO.phone;
         const callBtns = document.querySelectorAll('a[href^="tel:"]');
         callBtns.forEach(btn => btn.href = "tel:" + phoneTxt.replace(/[^0-9]/g, ""));
     }, 1000);
 
+    // [★추가됨] 화면의 빈 공간 클릭 시 메뉴 닫기 기능
     document.addEventListener('click', function (e) {
         const menu = document.getElementById('navMenu');
         const btn = document.querySelector('.mobile-btn');
-        if (menu && menu.classList.contains('active') && !menu.contains(e.target) && !btn.contains(e.target)) {
-            menu.classList.remove('active');
+
+        // 메뉴가 존재하고, 현재 열려있는 상태라면
+        if (menu && menu.classList.contains('active')) {
+            // 클릭한 곳이 메뉴 내부가 아니고, 햄버거 버튼 자체도 아니라면
+            if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('active'); // 메뉴 닫기
+            }
         }
     });
 });
