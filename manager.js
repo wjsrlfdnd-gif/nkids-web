@@ -1,12 +1,8 @@
-// manager.js - 이미지 로고 적용 버전
+// manager.js - 디자인이 업그레이드된 헤더/푸터 관리자
 
-// [1] 구글 스프레드시트 주소 (기존 주소 그대로 유지하세요)
-const SHEET_URL = "여기에_아까_복사한_구글시트_주소를_붙여넣으세요";
-
-// [★중요★] 여기에 사장님의 진짜 로고 이미지 주소를 넣으세요!
-// 지금은 테스트용 임시 이미지가 들어있습니다.
+// [1] 설정값 (구글 시트 & 로고)
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbz68tFmFB7IuCEhLIgnm4RMuqiYlXzdgqDVikGFOODFVuh9wXfdOL4aZ4VFy-7HAsVPjQ/exec";
 const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/nkids-web/logo.png";
-
 
 // 기본 정보
 const DEFAULT_INFO = {
@@ -16,7 +12,7 @@ const DEFAULT_INFO = {
     phone: "010-2333-2563 / 010-5522-8109"
 };
 
-// [3] 엑셀 데이터 로딩 함수
+// [2] 엑셀 데이터 로딩 함수
 async function loadDataFromSheet() {
     try {
         const response = await fetch(SHEET_URL);
@@ -25,58 +21,105 @@ async function loadDataFromSheet() {
 
         rows.forEach(row => {
             const columns = row.split(",");
-            const id = columns[0].trim(); 
-            let text = columns.slice(1).join(",").trim(); 
-            text = text.replace(/^"|"$/g, ''); 
+            const id = columns[0].trim();
+            let text = columns.slice(1).join(",").trim();
+            text = text.replace(/^"|"$/g, '');
 
             const element = document.getElementById(id);
             if (element) {
                 element.innerHTML = text.replace(/\\n/g, "<br>");
             }
         });
-        console.log("엑셀 데이터 연동 완료!");
-    } catch (error) {
-        console.error("엑셀 연동 실패 (주소를 확인하세요):", error);
-    }
+    } catch (error) { console.error("엑셀 연동 실패:", error); }
 }
 
-// [4] 헤더(메뉴) 만들기 - ★모든 페이지가 이 함수를 씁니다★
+// [3] ★헤더(메뉴) 만들기 - 보내주신 디자인 적용됨★
 function loadHeader() {
-    // 1. 스타일 주입 (점 없애기, 드롭다운, 로고 등)
+    // 1. 스타일 주입 (CSS)
     const style = document.createElement('style');
     style.innerHTML = `
-        /* [핵심] 리스트 점(bullet) 없애기 & 여백 초기화 */
-        ul.nav-menu, ul.dropdown { list-style: none !important; margin: 0; padding: 0; }
-
-        /* 드롭다운 스타일 */
-        .nav-menu li { position: relative; padding: 10px 0; }
-        .dropdown {
-            display: none; position: absolute; top: 100%; left: 50%; 
-            transform: translateX(-50%); background: white; min-width: 200px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px;
-            border: 1px solid #eee; padding: 10px 0; z-index: 9999;
+        /* [헤더 전체 스타일] */
+        header { 
+            width: 100%; 
+            height: 70px; 
+            background-color: #fff; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); /* 그림자 효과 */
+            position: fixed; /* 상단 고정 */
+            top: 0; 
+            left: 0;
+            z-index: 1000; 
         }
-        .nav-menu li:hover .dropdown { display: block; }
+
+        /* [내용 정렬] */
+        .header-inner { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            height: 100%; 
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* [로고] */
+        .logo-link { display: flex; align-items: center; height: 100%; text-decoration: none; }
+        .logo-img { max-height: 45px; width: auto; display: block; }
+
+        /* [메뉴 리스트] */
+        ul.nav-menu, ul.dropdown { list-style: none !important; margin: 0; padding: 0; }
+        .nav-menu { display: flex; gap: 30px; }
+        .nav-menu > li { position: relative; padding: 20px 0; } /* 클릭 영역 확보 */
+        
+        /* [메뉴 링크 글씨] */
+        .nav-menu > li > a {
+            font-size: 1.05rem;
+            color: #333;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .nav-menu > li > a:hover { color: #f4a261; } /* 마우스 올리면 주황색 */
+
+        /* [드롭다운(하위) 메뉴] */
+        .dropdown {
+            display: none; 
+            position: absolute; 
+            top: 100%; /* 부모 바로 아래 */
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: white; 
+            min-width: 180px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            border-radius: 8px;
+            border: 1px solid #eee; 
+            padding: 10px 0; 
+            z-index: 9999;
+        }
+        .nav-menu li:hover .dropdown { display: block; } /* 마우스 올리면 보임 */
+        
         .dropdown li a {
             display: block; padding: 12px 20px; font-size: 0.95rem; color: #555;
             text-align: center; white-space: nowrap; transition: 0.2s; text-decoration: none;
         }
         .dropdown li a:hover { background-color: #f8f9fa; color: #f4a261; font-weight: bold; }
-        
-        /* 로고 스타일 */
-        .logo-link { display: flex; align-items: center; height: 100%; }
-        .logo-img { max-height: 50px; width: auto; display: block; }
 
-        /* 모바일 대응 */
-        @media (max-width: 768px) { .dropdown { display: none !important; } }
+        /* [게시판 & 견적요청 강조] */
+        .highlight-menu { color: #1a3c6e !important; font-weight: 700 !important; }
+        .cta-menu { color: #e76f51 !important; font-weight: 700 !important; }
+
+        /* [모바일 대응 - 일단 숨김 처리] */
+        @media (max-width: 768px) { 
+            .nav-menu { display: none; } /* 추후 모바일 메뉴 추가 필요 */
+            .header-inner { justify-content: center; }
+        }
     `;
     document.head.appendChild(style);
 
-    // 2. 헤더 HTML 교체 (여기가 바뀌면 모든 페이지가 바뀝니다)
+    // 2. HTML 주입
     const headerEl = document.querySelector('header');
-    if(headerEl) {
+    if (headerEl) {
         headerEl.innerHTML = `
-            <div class="container header-inner">
+            <div class="header-inner">
                 <a href="index.html" class="logo-link">
                     <img src="${LOGO_IMAGE_URL}" alt="NEW KIDS" class="logo-img">
                 </a>
@@ -101,18 +144,19 @@ function loadHeader() {
                         </ul>
                     </li>
 
-                    <li><a href="proposal.html" style="color:#1a3c6e; font-weight:bold;">견적요청</a></li>
-                    
+                    <li><a href="board.html" class="highlight-menu">📢 소통 게시판</a></li>
+
+                    <li><a href="proposal.html" class="cta-menu">견적요청</a></li>
                 </ul>
             </div>
         `;
     }
 }
 
-// [5] 푸터(하단 정보) 만들기
+// [4] 푸터(하단 정보) 만들기
 function loadFooter() {
     const footerEl = document.querySelector('footer');
-    if(footerEl) {
+    if (footerEl) {
         footerEl.innerHTML = `
             <div class="container">
                 <p>(주)뉴키즈 | 대표: <span id="info_ceo">${DEFAULT_INFO.ceo}</span></p>
@@ -125,16 +169,16 @@ function loadFooter() {
     }
 }
 
-// [6] 실행
-document.addEventListener("DOMContentLoaded", function() {
+// [5] 실행
+document.addEventListener("DOMContentLoaded", function () {
     loadHeader();
     loadFooter();
-    loadDataFromSheet(); 
-    
+    loadDataFromSheet();
+
     // 전화번호 링크 자동 변환
     setTimeout(() => {
         const phoneTxt = document.getElementById('info_phone') ? document.getElementById('info_phone').innerText : DEFAULT_INFO.phone;
         const callBtns = document.querySelectorAll('a[href^="tel:"]');
         callBtns.forEach(btn => btn.href = "tel:" + phoneTxt.replace(/-/g, ""));
-    }, 1000); 
+    }, 1000);
 });

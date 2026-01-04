@@ -4,196 +4,336 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>뉴키즈 - 원어민 문화 체험</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* [기본 스타일] */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Pretendard', sans-serif; color: #333; line-height: 1.6; background: #fff; }
-        a { text-decoration: none; color: inherit; }
-        
-        :root { --primary-color: #1a3c6e; --accent-color: #f4a261; --bg-light: #f8f9fa; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-        section { padding: 80px 0; }
-        h2 { font-size: 2.2rem; text-align: center; margin-bottom: 40px; color: var(--primary-color); font-weight: 700; }
-        .btn { display: inline-block; padding: 12px 30px; background-color: var(--accent-color); color: #fff; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        .btn:hover { background-color: #e76f51; }
-        
-        /* [헤더] */
-        header { width: 100%; height: 70px; background-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: fixed; top: 0; z-index: 1000; }
-        .header-inner { display: flex; justify-content: space-between; align-items: center; height: 100%; }
-        .logo { font-size: 1.5rem; font-weight: 900; color: var(--primary-color); }
-        .nav-menu { display: flex; gap: 30px; }
-        .nav-menu li a:hover { color: var(--accent-color); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        /* [서브 배너] */
+        body {
+            font-family: 'Pretendard', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: #fff;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        :root {
+            --primary-color: #1a3c6e;
+            --accent-color: #f4a261;
+            --bg-light: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--accent-color);
+            color: #fff;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+            .btn:hover {
+                background-color: #e76f51;
+            }
+
+        /* [서브 배너 (가독성 강화)] */
         .sub-hero {
             height: 350px;
-            /* 원어민 선생님과 즐거운 수업 이미지 + 어두운 필터 */
-            background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
+            /* 배경: 세계지도 느낌의 이미지 */
+            background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
             background-size: cover;
-            display: flex; align-items: center; justify-content: center; text-align: center; color: #fff; margin-top: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+            margin-top: 50px; /* 헤더 높이만큼 띄움 (manager.js가 헤더 생성) */
         }
-        .sub-hero h1 { font-size: 3.2rem; font-weight: 800; margin-bottom: 20px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: -1px; }
-        .sub-hero p { font-size: 1.4rem; font-weight: 600; color: #ffdca8; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
 
-       /* [행사 카드 그리드] */
-        .event-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        
-        .event-card { 
-            background: #fff; border-radius: 15px; overflow: hidden; border: 1px solid #eee; 
-            transition: 0.3s; display: flex; flex-direction: column;
-        }
-        .event-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--accent-color); }
-        
-        .event-img { width: 100%; height: 200px; background-color: #ddd; background-size: cover; background-position: center; }
-        .event-info { padding: 25px; flex: 1; display: flex; flex-direction: column; }
-        .event-tag { 
-            display: inline-block; padding: 5px 12px; border-radius: 15px; 
-            font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; color: #fff; width: fit-content;
-        }
-        .event-title { font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; color: #333; }
-        .event-desc { color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 15px; flex: 1; }
+            .sub-hero h1 {
+                font-size: 3.2rem;
+                font-weight: 800;
+                margin-bottom: 20px;
+                text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+                letter-spacing: -1px;
+            }
 
-        /* 태그 색상 */
-        .bg-global { background-color: #1a3c6e; } /* 세계문화 */
-        .bg-job { background-color: #f4a261; }    /* 직업체험 */
-        .bg-fun { background-color: #e63946; }    /* 이색체험 */
-        .bg-season { background-color: #2a9d8f; } /* 시즌행사 */
-        .bg-art { background-color: #7209b7; }    /* 예술/공연 */
-        
-        footer { background: #222; color: #888; padding: 40px 0; text-align: center; }
+            .sub-hero p {
+                font-size: 1.4rem;
+                font-weight: 600;
+                color: #ffdca8;
+                text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+            }
+
+        /* [소개 문구 박스] */
+        .intro-summary {
+            background-color: #fff;
+            text-align: center;
+            padding: 60px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .intro-box {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid var(--primary-color);
+            padding: 40px;
+            border-radius: 15px;
+            background-color: #fff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+            .intro-box h3 {
+                font-size: 1.6rem;
+                color: var(--primary-color);
+                margin-bottom: 20px;
+            }
+
+            .intro-box p {
+                font-size: 1.1rem;
+                color: #555;
+                word-break: keep-all;
+            }
+
+        /* [갤러리 스타일 (기존 기능 유지 + 스타일 업그레이드)] */
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-write {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+
+            .btn-write:hover {
+                background: var(--accent-color);
+                transform: translateY(-3px);
+            }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid #eee;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+            .card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+                border-color: var(--accent-color);
+            }
+
+        .card-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-meta {
+            font-size: 0.9rem;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        footer {
+            background: #222;
+            color: #888;
+            padding: 40px 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .sub-hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .sub-hero p {
+                font-size: 1.1rem;
+                padding: 0 20px;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <header></header>
-
-    <section class="sub-hero">
-        <div class="container">
+    <header></header> <section class="sub-hero">
+        <div>
             <h1>원어민 문화 체험</h1>
-            <p>Hello! 살아있는 영어와 함께하는 글로벌 축제<br>원어민 선생님과 친구가 되는 특별한 하루</p>
+            <p>세계 여러 나라의 문화를 원어민 선생님과 생생하게 경험해요!</p>
+        </div>
+    </section>
+
+    <section class="intro-summary">
+        <div class="intro-box">
+            <h3>🌍 글로벌 리더로 자라나는 첫걸음</h3>
+            <p>
+                매달 새로운 나라의 문화를 체험하며, 아이들의 시야를 넓혀줍니다.<br>
+                원어민 선생님과 함께하는 즐거운 놀이 활동을 통해<br>
+                자연스럽게 영어를 접하고 다문화 감수성을 키울 수 있습니다.
+            </p>
         </div>
     </section>
 
     <section style="background-color: var(--bg-light);">
         <div class="container">
-            <h2>Global Experience Best 11</h2>
-            <p class="section-desc">언어의 장벽을 넘어 즐겁게 소통하는 생생한 체험 프로그램</p>
-            
-            <div class="event-grid">
-                
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-season">Season Event</span>
-                        <h3 class="event-title">🎄 매직 크리스마스</h3>
-                        <p class="event-desc">산타 할아버지와 함께하는 영어 캐롤 파티! 선물을 주고받고 트리를 꾸미며 서양의 크리스마스 문화를 경험합니다.</p>
-                    </div>
-                </div>
+            <div class="gallery-header">
+                <h2 style="margin-bottom:0; text-align:left;">📸 활동 사진첩</h2>
+                <a href="gallery_write.html" class="btn-write">사진 올리기 +</a>
+            </div>
 
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-global">Life Skill</span>
-                        <h3 class="event-title">🛒 잉글리시 마켓 데이</h3>
-                        <p class="event-desc">"How much is it?" 달러(Dollar)를 사용하여 물건을 사고팔아요. 실제 마트처럼 꾸며진 공간에서 경제 관념과 쇼핑 영어를 배웁니다.</p>
-                    </div>
+            <div id="gallery-list" class="gallery-grid">
+                <div style="text-align:center; width:100%; grid-column: 1/-1; padding:50px; color:#666;">
+                    활동 사진을 불러오는 중입니다...
                 </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1569154941061-e231b4725ef1?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-job">Role Play</span>
-                        <h3 class="event-title">✈️ 두근두근 공항 체험</h3>
-                        <p class="event-desc">여권을 들고 입국 심사부터 비행기 탑승까지! 기내식 주문 등 여행에 꼭 필요한 영어 표현을 역할 놀이로 익힙니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-job">Job Experience</span>
-                        <h3 class="event-title">✂️ 뷰티 헤어 살롱</h3>
-                        <p class="event-desc">"I like this style!" 멋진 헤어 디자이너가 되어 친구의 머리를 꾸며줍니다. 미용 도구의 이름을 영어로 배우고 손님을 응대합니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1588612735745-f09d846174a8?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-job">Safety First</span>
-                        <h3 class="event-title">🚒 용감한 소방관 (Firefighter)</h3>
-                        <p class="event-desc">긴급 출동! 소방관 유니폼을 입고 영어로 구조 신호를 외칩니다. 불을 끄는 체험을 하며 안전 수칙을 영어로 배웁니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-art">Show Time</span>
-                        <h3 class="event-title">🎩 판타스틱 매직 쇼</h3>
-                        <p class="event-desc">수리수리 마수리! 원어민 마술사의 신기한 공연을 관람하고, 간단한 마술 트릭을 영어로 배워 친구들에게 보여줍니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1563721323-9533303a743c?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-fun">Story Play</span>
-                        <h3 class="event-title">🐔 암탉 아줌마의 하루</h3>
-                        <p class="event-desc">농장의 하루는 바빠요! 알을 품고 병아리를 돌보는 암탉이 되어 봅니다. 자연과 동물을 주제로 한 따뜻한 스토리텔링 체험입니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1571583091910-449e6d0fc636?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-fun">Funny Costume</span>
-                        <h3 class="event-title">👵👴 백세 클럽 (Old Couple)</h3>
-                        <p class="event-desc">꼬부랑 할머니, 할아버지가 되어볼까요? 가발과 지팡이로 분장하고 느릿느릿 걷기 게임을 하며 웃음꽃을 피우는 이색 퍼포먼스입니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-global">Food Culture</span>
-                        <h3 class="event-title">🌮 월드 푸드 페스티벌</h3>
-                        <p class="event-desc">맛있는 세계 여행! 멕시코 타코, 이탈리아 피자 등 각국의 대표 음식을 맛보고 식재료와 맛을 표현하는 영어 단어를 익힙니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-global">Global Culture</span>
-                        <h3 class="event-title">🇧🇷 정열의 나라, 브라질</h3>
-                        <p class="event-desc">삼바 춤을 추고 아마존 정글을 탐험해요! 화려한 카니발 가면을 만들고 축구를 즐기며 브라질의 뜨거운 문화를 느낍니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1579783483458-83d02161294e?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-fun">Active Play</span>
-                        <h3 class="event-title">🪖 충성! 진짜 사나이 (Boot Camp)</h3>
-                        <p class="event-desc">씩씩한 군인이 되어 장애물을 통과하고 경례를 배웁니다. 규칙과 규율을 즐거운 신체 활동으로 배우는 밀리터리 캠프입니다.</p>
-                    </div>
-                </div>
-
             </div>
         </div>
     </section>
 
-    <section style="text-align: center; background-color: var(--primary-color); color: #fff;">
-        <div class="container">
-            <h2 style="color: #fff;">원어민 선생님 방문 일정을 잡고 싶으신가요?</h2>
-            <p style="margin-bottom: 20px;">인기 테마는 예약이 빨리 마감됩니다. 미리 신청해 주세요.</p>
-            <a href="proposal.html" class="btn" style="background: #fff; color: var(--primary-color);">📞 스케줄 문의 및 견적</a>
-        </div>
-    </section>
-
     <footer></footer>
+    <script src="manager.js"></script>
 
-<script src="manager.js"></script>
+    <script>
+        // [설정값]
+        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // [헬퍼 함수] 유튜브 ID 추출기
+        function getYoutubeId(url) {
+            if (!url) return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        async function loadGallery() {
+            try {
+                const { data, error } = await sb
+                    .from('gallery')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                const list = document.getElementById('gallery-list');
+                list.innerHTML = "";
+
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    list.innerHTML = `<div style="text-align:center; padding:50px; grid-column:1/-1;">아직 등록된 사진이 없습니다.</div>`;
+                    return;
+                }
+
+                data.forEach(item => {
+                    const fileUrl = item.file_url || "";
+                    const youtubeId = getYoutubeId(fileUrl);
+                    let mediaTag = "";
+
+                    // [로직] 1. 유튜브 링크면 -> 유튜브 썸네일 표시
+                    if (youtubeId) {
+                        mediaTag = `
+                            <div style="position:relative; width:100%; height:220px; background:#000;">
+                                <img src="https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg" class="card-img" style="opacity:0.8;">
+                                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:white; font-size:40px; text-shadow:0 0 10px rgba(0,0,0,0.5);">▶</div>
+                            </div>
+                        `;
+                    }
+                    // [로직] 2. 직접 올린 동영상 파일이면
+                    else if (fileUrl.includes('.mp4') || fileUrl.includes('.mov')) {
+                        mediaTag = `<div class="card-img" style="display:flex; align-items:center; justify-content:center; background:#000; color:#fff; font-size:30px;">▶</div>`;
+                    }
+                    // [로직] 3. 일반 이미지면
+                    else {
+                        mediaTag = `<img src="${fileUrl}" class="card-img" onerror="this.src='https://placehold.co/300x200?text=No+Image'">`;
+                    }
+
+                    const date = item.created_at ? item.created_at.split('T')[0] : "";
+
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.onclick = () => location.href = `gallery_view.html?id=${item.id}`;
+
+                    div.innerHTML = `
+                        ${mediaTag}
+                        <div class="card-body">
+                            <div class="card-title">${item.title}</div>
+                            <div class="card-meta">
+                                <span>${item.writer}</span>
+                                <span>${date}</span>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('gallery-list').innerHTML = `<div style="text-align:center; grid-column:1/-1;">불러오기 실패</div>`;
+            }
+        }
+
+        loadGallery();
+    </script>
 </body>
 </html>

@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글쓰기</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 200px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            background: #1a3c6e;
+            color: white;
+            padding: 12px;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 style="color: #1a3c6e;">✏️ 새 글 작성</h2>
+
+        <label>작성자</label>
+        <input type="text" id="writer" placeholder="이름을 입력하세요">
+
+        <label>제목</label>
+        <input type="text" id="title" placeholder="제목을 입력하세요">
+
+        <label>내용</label>
+        <textarea id="content" placeholder="내용을 입력하세요"></textarea>
+
+        <button class="btn-submit" onclick="savePost()">등록하기</button>
+        <a href="board.html" style="display:block; text-align:center; margin-top:15px; color:#666;">취소하고 돌아가기</a>
+    </div>
+
+    <script>
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+        // [1단계] 여기에 사장님의 슈파베이스 주소와 키를 넣어주세요.
+        // (따옴표 "" 안에 넣어야 합니다!)
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+
+        const MY_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+        const MY_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+
+        // [2단계] 연결 시작 (이 코드는 건드리지 마세요)
+        let clientDB = null;
+        try {
+            if (!MY_URL || !MY_KEY || MY_URL.includes("여기에")) {
+                console.error("오류: URL과 KEY를 입력하지 않았습니다.");
+            } else {
+                clientDB = supabase.createClient(MY_URL, MY_KEY);
+                console.log("DB 연결 성공!");
+            }
+        } catch (e) {
+            console.error("DB 연결 실패:", e);
+        }
+
+        // [3단계] 저장 함수
+        async function savePost() {
+            // 연결 확인
+            if (!clientDB) {
+                alert("데이터베이스 연결 실패!\n코드 위쪽의 MY_URL과 MY_KEY에 값을 넣었는지 확인해주세요.");
+                return;
+            }
+
+            const writer = document.getElementById('writer').value;
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+
+            if (!title || !content || !writer) {
+                alert("빈칸을 모두 채워주세요!");
+                return;
+            }
+
+            try {
+                // 데이터 전송
+                const { error } = await clientDB
+                    .from('posts')
+                    .insert([{ title: title, writer: writer, content: content }]);
+
+                if (error) {
+                    alert("저장 실패: " + error.message);
+                } else {
+                    alert("등록되었습니다!");
+                    window.location.href = "board.html";
+                }
+            } catch (err) {
+                alert("오류 발생: " + err);
+            }
+        }
+    </script>
+</body>
+</html>

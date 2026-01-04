@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>글쓰기/수정하기</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            background: #1a3c6e;
+            color: white;
+            padding: 12px;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            border-radius: 5px;
+        }
+
+        .upload-option {
+            background: #f8f9fa;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+            display: block;
+        }
+
+        .divider {
+            text-align: center;
+            color: #aaa;
+            margin: 10px 0;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="page-title" style="color: #1a3c6e;">📸 사진 또는 동영상 올리기</h2>
+
+        <label>작성자</label>
+        <input type="text" id="writer" placeholder="이름">
+        <label>제목</label>
+        <input type="text" id="title" placeholder="제목">
+        <label>내용</label>
+        <textarea id="content" placeholder="내용"></textarea>
+
+        <div class="upload-option">
+            <span class="option-title">방법 1. 사진/짧은 영상 파일 올리기</span>
+            <div id="current-file-msg" style="font-size:0.8rem; color:green; margin-bottom:5px; display:none;">
+                ✅ 기존 파일이 저장되어 있습니다. (변경하려면 새로 선택)
+            </div>
+            <input type="file" id="fileInput" accept="image/*, video/*">
+
+            <div class="divider">- 또는 -</div>
+
+            <span class="option-title">방법 2. 유튜브 동영상 링크 넣기</span>
+            <input type="text" id="youtubeInput" placeholder="예: https://youtu.be/..." style="margin-bottom:0;">
+            <p style="font-size:0.8rem; color:#888; margin-top:5px;">유튜브에서 '공유' 버튼을 눌러 주소를 복사해 오세요.</p>
+        </div>
+
+        <button class="btn-submit" onclick="uploadAndSave()">등록하기</button>
+        <a href="culture.html" style="display:block; text-align:center; margin-top:15px; color:#666;">취소하고 돌아가기</a>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // [중요] 주소창에 ?id=... 가 있는지 확인 (있으면 수정 모드)
+        const params = new URLSearchParams(window.location.search);
+        const editId = params.get('id');
+        let originalFileUrl = ""; // 기존 파일 주소 저장용
+
+        // 페이지 로딩 시 실행
+        window.onload = async function () {
+            if (editId) {
+                // 수정 모드라면?
+                document.getElementById('page-title').innerText = "✏️ 게시글 수정하기";
+                document.querySelector('.btn-submit').innerText = "수정 완료";
+
+                // 기존 데이터 불러오기
+                const { data, error } = await sb.from('gallery').select('*').eq('id', editId).single();
+
+                if (data) {
+                    document.getElementById('writer').value = data.writer;
+                    document.getElementById('title').value = data.title;
+                    document.getElementById('content').value = data.content;
+                    originalFileUrl = data.file_url || "";
+
+                    // 기존 파일이 유튜브 링크인지 확인
+                    if (originalFileUrl.includes('youtube.com') || originalFileUrl.includes('youtu.be')) {
+                        document.getElementById('youtubeInput').value = originalFileUrl;
+                    } else if (originalFileUrl) {
+                        // 일반 파일이면 안내 문구 표시
+                        document.getElementById('current-file-msg').style.display = 'block';
+                    }
+                }
+            }
+        };
+
+        async function uploadAndSave() {
+            if (!sb) { alert("연결 오류"); return; }
+
+            const writer = document.getElementById('writer').value;
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const fileInput = document.getElementById('fileInput');
+            const youtubeInput = document.getElementById('youtubeInput').value.trim();
+
+            // 유효성 검사
+            // (수정 모드일 때는 파일을 새로 안 골라도 되므로 originalFileUrl이 있으면 통과)
+            if (!title || !writer) {
+                alert("제목과 작성자는 필수입니다.");
+                return;
+            }
+            // 파일/링크 체크: 새 파일도 없고, 새 유튜브도 없고, 기존 파일도 없으면 경고
+            if (fileInput.files.length === 0 && !youtubeInput && !originalFileUrl) {
+                alert("사진/동영상을 선택하거나 유튜브 링크를 넣어주세요.");
+                return;
+            }
+
+            const btn = document.querySelector('.btn-submit');
+            btn.disabled = true;
+            btn.innerText = "처리 중...";
+
+            try {
+                let finalUrl = originalFileUrl; // 기본값은 기존 URL
+
+                // 1. 유튜브 링크가 새로 입력되었으면 그걸 씀
+                if (youtubeInput) {
+                    finalUrl = youtubeInput;
+                }
+                // 2. 새 파일이 선택되었으면 업로드 후 그걸 씀
+                else if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const fileName = Date.now() + "_" + file.name;
+
+                    const { error: uploadError } = await sb.storage.from('uploads').upload(fileName, file);
+                    if (uploadError) throw uploadError;
+
+                    const { data: { publicUrl } } = sb.storage.from('uploads').getPublicUrl(fileName);
+                    finalUrl = publicUrl;
+                }
+                // 3. 아무것도 안 바꿨으면 finalUrl은 originalFileUrl 그대로 유지됨
+
+                // DB 저장 (수정 vs 신규)
+                let error = null;
+
+                if (editId) {
+                    // [수정 모드] UPDATE
+                    const { error: updateError } = await sb
+                        .from('gallery')
+                        .update({ title, writer, content, file_url: finalUrl })
+                        .eq('id', editId);
+                    error = updateError;
+                } else {
+                    // [신규 등록] INSERT
+                    const { error: insertError } = await sb
+                        .from('gallery')
+                        .insert([{ title, writer, content, file_url: finalUrl }]);
+                    error = insertError;
+                }
+
+                if (error) throw error;
+
+                alert(editId ? "수정되었습니다!" : "등록되었습니다!");
+
+                // 수정 후에는 상세보기로, 신규 등록 후에는 목록으로
+                if (editId) {
+                    window.location.href = `gallery_view.html?id=${editId}`;
+                } else {
+                    window.location.href = "culture.html";
+                }
+
+            } catch (err) {
+                alert("오류: " + err.message);
+                btn.disabled = false;
+                btn.innerText = editId ? "수정 완료" : "등록하기";
+            }
+        }
+    </script>
+</body>
+</html>

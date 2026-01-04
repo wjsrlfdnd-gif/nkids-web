@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글 보기</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+        }
+
+        .view-header {
+            border-bottom: 2px solid #1a3c6e;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .view-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .view-info {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .view-content {
+            min-height: 200px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .btn-list {
+            display: inline-block;
+            background: #666;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .btn-delete {
+            float: right;
+            background: #e76f51;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="view-header">
+            <div class="view-title" id="v-title">로딩 중...</div>
+            <div class="view-info" id="v-info"></div>
+        </div>
+        <div class="view-content" id="v-content"></div>
+
+        <a href="board.html" class="btn-list">목록으로</a>
+        <button class="btn-delete" onclick="deletePost()">삭제하기</button>
+    </div>
+
+    <script>
+        // ★ 슈파베이스 설정
+        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 주소창에서 id 가져오기 (예: view.html?id=5)
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        async function loadPost() {
+            if(!id) { alert("잘못된 접근입니다."); location.href='board.html'; return; }
+
+            // ID가 일치하는 글 1개만 가져오기 (SELECT)
+            const { data, error } = await _supabase
+                .from('posts')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                alert("글을 불러오지 못했습니다.");
+                location.href = 'board.html';
+                return;
+            }
+
+            document.getElementById('v-title').innerText = data.title;
+            document.getElementById('v-info').innerText = `작성자: ${data.writer} | 작성일: ${data.created_at.split('T')[0]}`;
+            document.getElementById('v-content').innerText = data.content;
+        }
+
+        async function deletePost() {
+            if(confirm("정말 이 글을 삭제하시겠습니까?")) {
+                const { error } = await _supabase
+                    .from('posts')
+                    .delete()
+                    .eq('id', id);
+
+                if(!error) {
+                    alert("삭제되었습니다.");
+                    location.href = 'board.html';
+                } else {
+                    alert("삭제 실패: " + error.message);
+                }
+            }
+        }
+
+        loadPost();
+    </script>
+</body>
+</html>

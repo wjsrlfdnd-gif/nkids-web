@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>활동 갤러리</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #1a3c6e;
+            margin: 0;
+        }
+
+        .btn-write {
+            background: #1a3c6e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* 갤러리 그리드 스타일 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            }
+
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-meta {
+            font-size: 0.9rem;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>📸 활동 갤러리</h2>
+            <div>
+                <a href="index.html" style="margin-right:15px; text-decoration:none; color:#555;">🏠 홈으로</a>
+                <a href="gallery_write.html" class="btn-write">사진 올리기</a>
+            </div>
+        </div>
+
+        <div id="gallery-list" class="gallery-grid">
+            <div style="text-align:center; width:100%; grid-column: 1/-1; padding:50px; color: #666;">
+                데이터를 불러오는 중입니다...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+        // [1단계] 사장님 키값 적용 완료
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+
+        // 연결 시작
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+        // [2단계] 목록 불러오기 함수
+        async function loadGallery() {
+            try {
+                // gallery 테이블에서 데이터 가져오기 (최신순)
+                const { data, error } = await sb
+                    .from('gallery')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                const list = document.getElementById('gallery-list');
+                list.innerHTML = ""; // 로딩 문구 삭제
+
+                // 에러가 났을 경우
+                if (error) {
+                    console.error("에러 내용:", error);
+                    list.innerHTML = `<div style="text-align:center; padding:50px; grid-column:1/-1; color:red;">
+                            데이터를 불러오지 못했습니다.<br>(${error.message})
+                        </div>`;
+                    return;
+                }
+
+                // 데이터가 없을 경우
+                if (!data || data.length === 0) {
+                    list.innerHTML = `<div style="text-align:center; padding:50px; grid-column:1/-1;">등록된 사진이 없습니다.</div>`;
+                    return;
+                }
+
+                // 카드 만들기 반복문
+                data.forEach(item => {
+                    // 파일 주소가 없으면 빈칸 처리
+                    const fileUrl = item.file_url || "";
+
+                    // 비디오인지 이미지인지 확인해서 썸네일 처리
+                    let mediaTag = `<img src="${fileUrl}" class="card-img" onerror="this.src='https://placehold.co/300x200?text=No+Image'">`;
+
+                    if (fileUrl.includes('.mp4') || fileUrl.includes('.mov') || fileUrl.includes('.webm')) {
+                        mediaTag = `<div class="card-img" style="display:flex; align-items:center; justify-content:center; background:#000; color:#fff; font-size:30px;">▶</div>`;
+                    }
+
+                    const date = item.created_at ? item.created_at.split('T')[0] : "날짜없음";
+
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    // 클릭하면 상세보기(gallery_view.html)로 이동
+                    div.onclick = () => location.href = `gallery_view.html?id=${item.id}`;
+
+                    div.innerHTML = `
+                            ${mediaTag}
+                            <div class="card-body">
+                                <div class="card-title">${item.title}</div>
+                                <div class="card-meta">
+                                    <span>${item.writer}</span>
+                                    <span>${date}</span>
+                                </div>
+                            </div>
+                        `;
+                    list.appendChild(div);
+                });
+
+            } catch (err) {
+                console.error("시스템 에러:", err);
+                alert("목록을 불러오는 중 오류가 발생했습니다.");
+            }
+        }
+
+        // 페이지 열리면 자동 실행
+        loadGallery();
+    </script>
+</body>
+</html>

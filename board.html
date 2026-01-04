@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴키즈 - 소통 게시판</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #1a3c6e;
+            margin: 0;
+        }
+
+        .btn-write {
+            background: #1a3c6e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            border-bottom: 2px solid #ddd;
+            color: #555;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        .title-col {
+            text-align: left;
+            cursor: pointer;
+            color: #333;
+        }
+
+            .title-col:hover {
+                color: #f4a261;
+                text-decoration: underline;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2>📢 소통 게시판</h2>
+            <div style="display:flex; gap:10px;">
+                <a href="index.html" style="padding:10px; color:#666;">🏠 홈으로</a>
+                <a href="write.html" class="btn-write">✏️ 글쓰기</a>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="10%">번호</th>
+                    <th width="50%">제목</th>
+                    <th width="15%">작성자</th>
+                    <th width="25%">작성일</th>
+                </tr>
+            </thead>
+            <tbody id="board-list">
+                <tr><td colspan="4">게시글을 불러오는 중...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // ★ 슈파베이스 설정 (복사한 키 입력)
+        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function loadPosts() {
+            // posts 테이블에서 모든 데이터 가져오기 (최신순 정렬)
+            const { data, error } = await _supabase
+                .from('posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            const list = document.getElementById('board-list');
+            list.innerHTML = "";
+
+            if (error) {
+                list.innerHTML = `<tr><td colspan="4">에러 발생: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                list.innerHTML = `<tr><td colspan="4">등록된 게시글이 없습니다.</td></tr>`;
+                return;
+            }
+
+            data.forEach((post, index) => {
+                // 날짜 예쁘게 자르기 (2026-01-04 까지만)
+                const date = post.created_at.split('T')[0];
+
+                // 번호 계산 (전체 개수 - 인덱스)
+                const num = data.length - index;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${num}</td>
+                    <td class="title-col" onclick="location.href='view.html?id=${post.id}'">${post.title}</td>
+                    <td>${post.writer}</td>
+                    <td>${date}</td>
+                `;
+                list.appendChild(tr);
+            });
+        }
+        loadPosts();
+    </script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상세보기</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+        }
+
+        .view-media {
+            width: 100%;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+            .view-media img, .view-media video {
+                max-width: 100%;
+                max-height: 600px;
+                object-fit: contain;
+            }
+
+        .view-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .view-meta {
+            color: #888;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .view-content {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: #444;
+            min-height: 100px;
+        }
+
+        .btn-list {
+            background: #666;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 30px;
+            font-weight: bold;
+        }
+
+        .btn-edit {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            float: right;
+            margin-top: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px; /* 삭제 버튼과 간격 */
+            text-decoration: none; /* a태그일 경우 밑줄 제거 */
+            font-size: 0.9rem; /* 버튼 폰트 크기 통일 */
+        }
+
+        .btn-delete {
+            background: #e76f51;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            float: right;
+            margin-top: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="view-media" id="media-area">
+            <span style="color:white;">이미지 로딩 대기...</span>
+        </div>
+
+        <div class="view-title" id="v-title">제목 로딩 중...</div>
+        <div class="view-meta" id="v-meta">정보 로딩 중...</div>
+        <div class="view-content" id="v-content">내용 로딩 중...</div>
+
+        <a href="culture.html" class="btn-list">목록으로</a>
+
+        <div style="float:right;">
+            <a href="javascript:void(0)" onclick="goEdit()" class="btn-edit">수정하기</a>
+            <button class="btn-delete" onclick="deletePost()">삭제하기</button>
+        </div>
+    </div>
+
+    <script>
+        // [1] 설정값
+        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        // [헬퍼 함수] 유튜브 ID 추출 (쇼츠, 모바일, 일반 주소 모두 대응)
+        function getYoutubeId(url) {
+            if (!url) return null;
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+
+            if (match && match[7].length === 11) {
+                return match[7];
+            } else if (url.includes('/shorts/')) {
+                return url.split('/shorts/')[1].split('?')[0];
+            }
+            return null;
+        }
+
+        async function loadPost() {
+            if (!id) { alert("잘못된 접근입니다."); location.href = 'culture.html'; return; }
+
+            try {
+                const { data, error } = await sb
+                    .from('gallery')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                // 텍스트 정보 채우기
+                document.getElementById('v-title').innerText = data.title;
+                const date = data.created_at ? data.created_at.split('T')[0] : "";
+                document.getElementById('v-meta').innerText = `작성자: ${data.writer} | 작성일: ${date}`;
+                document.getElementById('v-content').innerText = data.content;
+
+                // 미디어(사진/동영상) 처리
+                const fileUrl = data.file_url || "";
+                const mediaArea = document.getElementById('media-area');
+                const youtubeId = getYoutubeId(fileUrl);
+
+                // [CASE 1] 유튜브 링크인 경우 (★여기가 수정된 핵심 부분★)
+                if (youtubeId) {
+                    // 현재 사이트 주소(origin)를 유튜브에 알려줘서 보안 통과
+                    const origin = window.location.origin;
+
+                    mediaArea.innerHTML = `
+                        <iframe width="100%" height="500"
+                            src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1&origin=${origin}"
+                            title="YouTube video player" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allowfullscreen>
+                        </iframe>`;
+                }
+                // [CASE 2] 직접 올린 동영상 파일
+                else if (fileUrl.includes('.mp4') || fileUrl.includes('.mov') || fileUrl.includes('.webm')) {
+                    mediaArea.innerHTML = `
+                        <video src="${fileUrl}" controls autoplay muted playsinline style="max-height:500px; width:100%; background:black;">
+                            브라우저가 동영상을 지원하지 않습니다.
+                        </video>`;
+                }
+                // [CASE 3] 이미지 파일
+                else {
+                    mediaArea.innerHTML = `<img src="${fileUrl}" alt="상세 이미지">`;
+                }
+
+            } catch (err) {
+                console.error("에러:", err);
+                alert("글을 불러올 수 없습니다.\n" + err.message);
+                location.href = 'culture.html';
+            }
+        }
+
+        // 수정 페이지로 이동
+        function goEdit() {
+            location.href = `gallery_write.html?id=${id}`;
+        }
+
+        // 삭제하기
+        async function deletePost() {
+            if (confirm("정말 삭제하시겠습니까?")) {
+                await sb.from('gallery').delete().eq('id', id);
+                alert("삭제되었습니다.");
+                location.href = 'culture.html';
+            }
+        }
+
+        loadPost();
+    </script>
+</body>
+</html>
