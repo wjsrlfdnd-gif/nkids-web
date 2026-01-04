@@ -79,6 +79,8 @@
         <button class="btn-delete" onclick="deletePost()">삭제하기</button>
     </div>
 
+    <script src="manager.js"></script>
+
     <script>
         // ★ 슈파베이스 설정
         const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
@@ -90,7 +92,7 @@
         const id = params.get('id');
 
         async function loadPost() {
-            if(!id) { alert("잘못된 접근입니다."); location.href='board.html'; return; }
+            if (!id) { alert("잘못된 접근입니다."); location.href = 'board.html'; return; }
 
             // ID가 일치하는 글 1개만 가져오기 (SELECT)
             const { data, error } = await _supabase
@@ -111,13 +113,13 @@
         }
 
         async function deletePost() {
-            if(confirm("정말 이 글을 삭제하시겠습니까?")) {
+            if (confirm("정말 이 글을 삭제하시겠습니까?")) {
                 const { error } = await _supabase
                     .from('posts')
                     .delete()
                     .eq('id', id);
 
-                if(!error) {
+                if (!error) {
                     alert("삭제되었습니다.");
                     location.href = 'board.html';
                 } else {

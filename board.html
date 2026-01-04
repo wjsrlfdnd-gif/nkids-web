@@ -99,6 +99,8 @@
         </table>
     </div>
 
+    <script src="manager.js"></script>
+
     <script>
         // ★ 슈파베이스 설정 (복사한 키 입력)
         const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
@@ -134,11 +136,11 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${num}</td>
-                    <td class="title-col" onclick="location.href='view.html?id=${post.id}'">${post.title}</td>
-                    <td>${post.writer}</td>
-                    <td>${date}</td>
-                `;
+                        <td>${num}</td>
+                        <td class="title-col" onclick="location.href='view.html?id=${post.id}'">${post.title}</td>
+                        <td>${post.writer}</td>
+                        <td>${date}</td>
+                    `;
                 list.appendChild(tr);
             });
         }

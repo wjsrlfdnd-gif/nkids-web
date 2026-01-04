@@ -41,32 +41,9 @@
             padding: 80px 0;
         }
 
-        h2 {
-            font-size: 2.2rem;
-            text-align: center;
-            margin-bottom: 40px;
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: var(--accent-color);
-            color: #fff;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-            .btn:hover {
-                background-color: #e76f51;
-            }
-
-        /* [서브 배너 (가독성 강화)] */
+        /* [서브 배너 스타일 (제공해주신 디자인)] */
         .sub-hero {
             height: 350px;
-            /* 배경: 세계지도 느낌의 이미지 */
             background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
             background-size: cover;
             display: flex;
@@ -75,7 +52,7 @@
             justify-content: center;
             text-align: center;
             color: #fff;
-            margin-top: 50px; /* 헤더 높이만큼 띄움 (manager.js가 헤더 생성) */
+            margin-top: 50px; /* 헤더 높이 확보 */
         }
 
             .sub-hero h1 {
@@ -93,7 +70,7 @@
                 text-shadow: 0 2px 5px rgba(0,0,0,0.8);
             }
 
-        /* [소개 문구 박스] */
+        /* [소개 박스] */
         .intro-summary {
             background-color: #fff;
             text-align: center;
@@ -123,88 +100,116 @@
                 word-break: keep-all;
             }
 
-        /* [갤러리 스타일 (기존 기능 유지 + 스타일 업그레이드)] */
-        .gallery-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .btn-write {
-            background: var(--primary-color);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: 0.3s;
-        }
-
-            .btn-write:hover {
-                background: var(--accent-color);
-                transform: translateY(-3px);
-            }
-
+        /* [게시판 그리드] */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 30px;
         }
 
+        /* 카드 스타일 */
         .card {
             background: white;
             border-radius: 15px;
             overflow: hidden;
-            cursor: pointer;
             transition: 0.3s;
             border: 1px solid #eee;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
         }
 
             .card:hover {
-                transform: translateY(-10px);
+                transform: translateY(-5px);
                 box-shadow: 0 15px 30px rgba(0,0,0,0.15);
                 border-color: var(--accent-color);
             }
 
         .card-img {
             width: 100%;
-            height: 220px;
+            height: 200px;
             object-fit: cover;
             background: #f0f0f0;
         }
 
         .card-body {
             padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .card-title {
             font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 8px;
+            font-size: 1.25rem;
+            margin-bottom: 10px;
             color: #333;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
-        .card-meta {
-            font-size: 0.9rem;
-            color: #888;
-            display: flex;
-            justify-content: space-between;
+        .card-text {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 15px;
+            flex-grow: 1;
+            white-space: pre-wrap;
         }
 
-        footer {
-            background: #222;
-            color: #888;
-            padding: 40px 0;
-            text-align: center;
-            font-size: 0.9rem;
+        .card-date {
+            font-size: 0.85rem;
+            color: #999;
+            text-align: right;
+            margin-top: auto;
         }
 
+        /* [관리자 전용 패널] - 평소엔 숨김 */
+        #admin-panel {
+            display: none; /* JS로 관리자일 때만 block 처리 */
+            background: #f1f1f1;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            border: 1px solid #ddd;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+            .input-group input, .input-group textarea {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                font-family: inherit;
+            }
+
+            .input-group textarea {
+                height: 100px;
+                resize: vertical;
+            }
+
+        .btn-action {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-save {
+            background: var(--primary-color);
+        }
+
+        .btn-delete {
+            background: #ff4d4d;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            margin-top: 10px;
+            float: right;
+        }
+
+        /* 반응형 */
         @media (max-width: 768px) {
             .sub-hero h1 {
                 font-size: 2.2rem;
@@ -213,6 +218,10 @@
             .sub-hero p {
                 font-size: 1.1rem;
                 padding: 0 20px;
+            }
+
+            .intro-box {
+                padding: 25px;
             }
         }
     </style>
@@ -239,14 +248,26 @@
 
     <section style="background-color: var(--bg-light);">
         <div class="container">
-            <div class="gallery-header">
-                <h2 style="margin-bottom:0; text-align:left;">📸 활동 사진첩</h2>
-                <a href="gallery_write.html" class="btn-write">사진 올리기 +</a>
+
+            <div id="admin-panel">
+                <h3 style="margin-bottom:15px; color:#333;">📝 관리자 글쓰기</h3>
+                <div class="input-group">
+                    <input type="text" id="post-title" placeholder="제목을 입력하세요">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="post-image" placeholder="이미지 주소 (URL) 붙여넣기">
+                </div>
+                <div class="input-group">
+                    <textarea id="post-content" placeholder="내용을 입력하세요"></textarea>
+                </div>
+                <button onclick="savePost()" class="btn-action btn-save">게시글 등록</button>
             </div>
 
-            <div id="gallery-list" class="gallery-grid">
-                <div style="text-align:center; width:100%; grid-column: 1/-1; padding:50px; color:#666;">
-                    활동 사진을 불러오는 중입니다...
+            <h2 style="text-align: left; font-size: 1.8rem; margin-bottom: 30px;">📸 체험 활동 현장</h2>
+
+            <div id="culture-list" class="gallery-grid">
+                <div style="text-align:center; grid-column: 1/-1; padding: 50px; color:#666;">
+                    로딩 중...
                 </div>
             </div>
         </div>
@@ -256,84 +277,95 @@
     <script src="manager.js"></script>
 
     <script>
-        // [설정값]
-        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // [1] Supabase 설정 (보안상 manager.js와 동일한 키 사용)
+        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co"; // 본인 URL
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ"; // 본인 Key
 
-        // [헬퍼 함수] 유튜브 ID 추출기
-        function getYoutubeId(url) {
-            if (!url) return null;
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
+        let sb_culture;
+        if (typeof supabase !== 'undefined') {
+            sb_culture = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
-        async function loadGallery() {
-            try {
-                const { data, error } = await sb
-                    .from('gallery')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+        // [2] 데이터 불러오기
+        async function loadCulture() {
+            if (!sb_culture) return;
 
-                const list = document.getElementById('gallery-list');
-                list.innerHTML = "";
+            // 관리자 로그인 체크
+            const { data: { session } } = await sb_culture.auth.getSession();
+            const isAdmin = !!session;
 
-                if (error) throw error;
-                if (!data || data.length === 0) {
-                    list.innerHTML = `<div style="text-align:center; padding:50px; grid-column:1/-1;">아직 등록된 사진이 없습니다.</div>`;
-                    return;
-                }
+            if (isAdmin) {
+                document.getElementById('admin-panel').style.display = 'block'; // 관리자면 글쓰기 창 보임
+            }
 
-                data.forEach(item => {
-                    const fileUrl = item.file_url || "";
-                    const youtubeId = getYoutubeId(fileUrl);
-                    let mediaTag = "";
+            // 데이터 가져오기 (culture_posts 테이블)
+            const { data, error } = await sb_culture
+                .from('culture_posts')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-                    // [로직] 1. 유튜브 링크면 -> 유튜브 썸네일 표시
-                    if (youtubeId) {
-                        mediaTag = `
-                            <div style="position:relative; width:100%; height:220px; background:#000;">
-                                <img src="https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg" class="card-img" style="opacity:0.8;">
-                                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:white; font-size:40px; text-shadow:0 0 10px rgba(0,0,0,0.5);">▶</div>
-                            </div>
-                        `;
-                    }
-                    // [로직] 2. 직접 올린 동영상 파일이면
-                    else if (fileUrl.includes('.mp4') || fileUrl.includes('.mov')) {
-                        mediaTag = `<div class="card-img" style="display:flex; align-items:center; justify-content:center; background:#000; color:#fff; font-size:30px;">▶</div>`;
-                    }
-                    // [로직] 3. 일반 이미지면
-                    else {
-                        mediaTag = `<img src="${fileUrl}" class="card-img" onerror="this.src='https://placehold.co/300x200?text=No+Image'">`;
-                    }
+            const list = document.getElementById('culture-list');
+            list.innerHTML = "";
 
-                    const date = item.created_at ? item.created_at.split('T')[0] : "";
+            if (error || !data || data.length === 0) {
+                list.innerHTML = `<div style="text-align:center; grid-column:1/-1; padding:50px;">등록된 게시글이 없습니다.</div>`;
+                return;
+            }
 
-                    const div = document.createElement('div');
-                    div.className = 'card';
-                    div.onclick = () => location.href = `gallery_view.html?id=${item.id}`;
+            // HTML 그리기
+            data.forEach(item => {
+                const date = item.created_at ? item.created_at.split('T')[0] : "";
+                const imgUrl = item.image_url || 'https://via.placeholder.com/400x300?text=No+Image';
 
-                    div.innerHTML = `
-                        ${mediaTag}
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                        <img src="${imgUrl}" class="card-img" onerror="this.src='https://via.placeholder.com/400x300?text=Error'">
                         <div class="card-body">
                             <div class="card-title">${item.title}</div>
-                            <div class="card-meta">
-                                <span>${item.writer}</span>
-                                <span>${date}</span>
-                            </div>
+                            <div class="card-text">${item.content}</div>
+                            <div class="card-date">${date}</div>
+                            ${isAdmin ? `<button onclick="deletePost(${item.id})" class="btn-action btn-delete">삭제</button>` : ''}
                         </div>
                     `;
-                    list.appendChild(div);
-                });
+                list.appendChild(div);
+            });
+        }
 
-            } catch (err) {
-                console.error(err);
-                document.getElementById('gallery-list').innerHTML = `<div style="text-align:center; grid-column:1/-1;">불러오기 실패</div>`;
+        // [3] 글 저장 (관리자용)
+        async function savePost() {
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+            const image = document.getElementById('post-image').value;
+
+            if (!title || !content) return alert("제목과 내용은 필수입니다.");
+
+            const { error } = await sb_culture
+                .from('culture_posts')
+                .insert([{ title, content, image_url: image }]);
+
+            if (error) alert("저장 실패: " + error.message);
+            else {
+                alert("등록되었습니다!");
+                location.reload();
             }
         }
 
-        loadGallery();
+        // [4] 글 삭제 (관리자용)
+        async function deletePost(id) {
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+
+            const { error } = await sb_culture
+                .from('culture_posts')
+                .delete()
+                .eq('id', id);
+
+            if (error) alert("삭제 실패");
+            else location.reload();
+        }
+
+        // 실행
+        loadCulture();
     </script>
 </body>
 </html>

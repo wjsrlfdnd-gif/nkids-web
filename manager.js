@@ -1,5 +1,8 @@
-// manager.js - 통합 관리자 (화면 터치 시 메뉴 닫힘 기능 추가)
+// manager.js - 통합 관리자 (반응형 + 메뉴기능 + Supabase 연동)
 
+// ============================================================
+// [1] 설정 및 상수 정의
+// ============================================================
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbz68tFmFB7IuCEhLIgnm4RMuqiYlXzdgqDVikGFOODFVuh9wXfdOL4aZ4VFy-7HAsVPjQ/exec";
 const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/nkids-web/logo.png";
 
@@ -10,7 +13,24 @@ const DEFAULT_INFO = {
     phone: "010-2333-2563 / 010-5522-8109"
 };
 
-// [0] 초기화: 뷰포트 메타태그 자동 삽입
+// ★ Supabase 키 설정 (전달해주신 키 적용됨)
+const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+
+// ★ Supabase 클라이언트 초기화 (전역 변수 window.sb로 사용 가능)
+window.sb = null; // 전역 변수 선언
+if (typeof supabase !== 'undefined') {
+    window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("Supabase 초기화 완료");
+} else {
+    console.warn("Supabase 라이브러리가 로드되지 않았습니다. HTML <head>에 스크립트를 추가하세요.");
+}
+
+// ============================================================
+// [2] 초기화 및 데이터 로딩
+// ============================================================
+
+// 뷰포트 메타태그 자동 삽입
 (function initViewport() {
     if (!document.querySelector('meta[name="viewport"]')) {
         const meta = document.createElement('meta');
@@ -20,7 +40,7 @@ const DEFAULT_INFO = {
     }
 })();
 
-// [1] 데이터 로딩
+// 구글 시트 데이터 로딩
 async function loadDataFromSheet() {
     try {
         const response = await fetch(SHEET_URL);
@@ -37,7 +57,9 @@ async function loadDataFromSheet() {
     } catch (error) { console.error("엑셀 연동 실패:", error); }
 }
 
-// [2] 헤더 및 전체 반응형 스타일 로드
+// ============================================================
+// [3] 헤더/푸터 및 스타일 생성
+// ============================================================
 function loadHeader() {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -138,20 +160,19 @@ function loadHeader() {
     }
 }
 
-// [핵심 기능 1] 메뉴 토글
+// [메뉴 기능 1] 메뉴 토글
 window.toggleMenu = function () {
     const menu = document.getElementById('navMenu');
     if (menu) menu.classList.toggle('active');
 };
 
-// [핵심 기능 2] 서브 메뉴 토글
+// [메뉴 기능 2] 서브 메뉴 토글
 window.toggleSubMenu = function (element) {
     if (window.innerWidth <= 768) {
         element.parentElement.classList.toggle('sub-open');
     }
 };
 
-// [3] 푸터 생성
 function loadFooter() {
     const footerEl = document.querySelector('footer');
     if (footerEl) {
@@ -161,13 +182,59 @@ function loadFooter() {
                 <p>주소: <span id="info_address">${DEFAULT_INFO.address}</span></p>
                 <p>문의: <span id="info_phone">${DEFAULT_INFO.phone}</span></p>
                 <br>
-                <p>&copy; 2026 New Kids. All rights reserved.</p>
+                <p onclick="handleAdminLogin()" style="cursor:pointer; user-select:none;">&copy; 2026 New Kids. All rights reserved.</p>
             </div>
         `;
     }
 }
 
-// [4] 실행 및 이벤트 등록
+// ============================================================
+// [4] 관리자 로그인 기능 (전역 함수)
+// ============================================================
+let clickCount = 0;
+window.handleAdminLogin = async function () {
+    clickCount++;
+    if (clickCount >= 2) {
+        clickCount = 0; // 초기화
+
+        if (!window.sb) {
+            alert("Supabase가 연결되지 않았습니다.");
+            return;
+        }
+
+        // 이미 로그인 되어있는지 확인
+        const { data: { session } } = await window.sb.auth.getSession();
+        if (session) {
+            if (confirm("이미 관리자로 로그인되어 있습니다. 로그아웃 하시겠습니까?")) {
+                await window.sb.auth.signOut();
+                alert("로그아웃 되었습니다.");
+                location.reload();
+            }
+            return;
+        }
+
+        // 로그인 시도
+        const email = prompt("관리자 이메일:");
+        const password = prompt("비밀번호:");
+        if (!email || !password) return;
+
+        const { data, error } = await window.sb.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            alert("로그인 실패: " + error.message);
+        } else {
+            alert("관리자로 로그인되었습니다.");
+            location.reload(); // 페이지 새로고침하여 관리자 UI 반영
+        }
+    }
+};
+
+// ============================================================
+// [5] 실행 및 이벤트 등록
+// ============================================================
 document.addEventListener("DOMContentLoaded", function () {
     loadHeader();
     loadFooter();
@@ -180,8 +247,8 @@ document.addEventListener("DOMContentLoaded", function () {
         callBtns.forEach(btn => btn.href = "tel:" + phoneTxt.replace(/[^0-9]/g, ""));
     }, 1000);
 
-    // [★추가됨] 화면의 빈 공간 클릭 시 메뉴 닫기 기능
-    document.addEventListener('click', function(e) {
+    // [화면 빈 공간 클릭 시 메뉴 닫기 기능]
+    document.addEventListener('click', function (e) {
         const menu = document.getElementById('navMenu');
         const btn = document.querySelector('.mobile-btn');
 
