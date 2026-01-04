@@ -120,99 +120,109 @@
     </div>
 
     <script>
-        // [1] 설정값
-        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // [1] 설정값
+    const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
 
-        // [헬퍼 함수] 유튜브 ID 추출 (쇼츠, 모바일, 일반 주소 모두 대응)
-        function getYoutubeId(url) {
-            if (!url) return null;
-            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-            const match = url.match(regExp);
+    // [헬퍼 함수] 유튜브 ID 추출 (더 강력한 버전)
+    function getYoutubeId(url) {
+        if (!url) return null;
+        // 1. 일반/모바일/임베드 주소 정규식
+        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+        const match = url.match(regExp);
+        if (match && match[7].length === 11) return match[7];
+        
+        // 2. Shorts 주소 대응
+        if (url.includes('/shorts/')) return url.split('/shorts/')[1].split('?')[0];
+        
+        // 3. 라이브 주소 등 대응
+        if (url.includes('/live/')) return url.split('/live/')[1].split('?')[0];
 
-            if (match && match[7].length === 11) {
-                return match[7];
-            } else if (url.includes('/shorts/')) {
-                return url.split('/shorts/')[1].split('?')[0];
-            }
-            return null;
-        }
+        return null;
+    }
 
-        async function loadPost() {
-            if (!id) { alert("잘못된 접근입니다."); location.href = 'culture.html'; return; }
+    async function loadPost() {
+        if (!id) { alert("잘못된 접근입니다."); location.href = 'culture.html'; return; }
 
-            try {
-                const { data, error } = await sb
-                    .from('gallery')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
+        try {
+            const { data, error } = await sb.from('gallery').select('*').eq('id', id).single();
+            if (error) throw error;
 
-                if (error) throw error;
+            document.getElementById('v-title').innerText = data.title;
+            const date = data.created_at ? data.created_at.split('T')[0] : "";
+            document.getElementById('v-meta').innerText = `작성자: ${data.writer} | 작성일: ${date}`;
+            document.getElementById('v-content').innerText = data.content;
 
-                // 텍스트 정보 채우기
-                document.getElementById('v-title').innerText = data.title;
-                const date = data.created_at ? data.created_at.split('T')[0] : "";
-                document.getElementById('v-meta').innerText = `작성자: ${data.writer} | 작성일: ${date}`;
-                document.getElementById('v-content').innerText = data.content;
+            const fileUrl = data.file_url || "";
+            const mediaArea = document.getElementById('media-area');
+            const youtubeId = getYoutubeId(fileUrl);
+            
+            // ★ 진단 메시지 출력 (화면에 보임) ★
+            console.log("원본 링크:", fileUrl);
+            console.log("추출된 ID:", youtubeId);
 
-                // 미디어(사진/동영상) 처리
-                const fileUrl = data.file_url || "";
-                const mediaArea = document.getElementById('media-area');
-                const youtubeId = getYoutubeId(fileUrl);
-
-                // [CASE 1] 유튜브 링크인 경우 (★여기가 수정된 핵심 부분★)
-                if (youtubeId) {
-                    // 현재 사이트 주소(origin)를 유튜브에 알려줘서 보안 통과
-                    const origin = window.location.origin;
-
+            // [CASE 1] 유튜브 링크
+            if (youtubeId) {
+                // 현재 실행 환경 확인 (file:// 인지 https:// 인지)
+                const origin = window.location.origin;
+                
+                if (origin.includes('file://')) {
+                     mediaArea.innerHTML = `
+                        <div style="color:white; text-align:center; padding:20px;">
+                            <h3 style="color:red;">⚠️ 컴퓨터 파일(file://) 상태에서는 재생불가!</h3>
+                            <p>유튜브 보안 정책 때문에 내 컴퓨터에서 더블클릭해서 열면 재생이 안 됩니다.</p>
+                            <p><strong>GitHub에 올린 뒤 인터넷 주소로 접속하세요.</strong></p>
+                            <p>추출된 ID: ${youtubeId}</p>
+                        </div>`;
+                } else {
                     mediaArea.innerHTML = `
-                        <iframe width="100%" height="500"
-                            src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1&origin=${origin}"
-                            title="YouTube video player" frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        <iframe width="100%" height="500" 
+                            src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1&origin=${origin}" 
+                            title="YouTube video player" frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                             referrerpolicy="strict-origin-when-cross-origin"
                             allowfullscreen>
                         </iframe>`;
                 }
-                // [CASE 2] 직접 올린 동영상 파일
-                else if (fileUrl.includes('.mp4') || fileUrl.includes('.mov') || fileUrl.includes('.webm')) {
-                    mediaArea.innerHTML = `
-                        <video src="${fileUrl}" controls autoplay muted playsinline style="max-height:500px; width:100%; background:black;">
-                            브라우저가 동영상을 지원하지 않습니다.
-                        </video>`;
-                }
-                // [CASE 3] 이미지 파일
-                else {
-                    mediaArea.innerHTML = `<img src="${fileUrl}" alt="상세 이미지">`;
-                }
-
-            } catch (err) {
-                console.error("에러:", err);
-                alert("글을 불러올 수 없습니다.\n" + err.message);
-                location.href = 'culture.html';
+            } 
+            // [CASE 2] 직접 올린 파일
+            else if (fileUrl.includes('.mp4') || fileUrl.includes('.mov')) {
+                mediaArea.innerHTML = `<video src="${fileUrl}" controls autoplay muted playsinline style="width:100%;"></video>`;
+            } 
+            // [CASE 3] 이미지
+            else if (fileUrl) {
+                mediaArea.innerHTML = `<img src="${fileUrl}" alt="이미지">`;
             }
-        }
-
-        // 수정 페이지로 이동
-        function goEdit() {
-            location.href = `gallery_write.html?id=${id}`;
-        }
-
-        // 삭제하기
-        async function deletePost() {
-            if (confirm("정말 삭제하시겠습니까?")) {
-                await sb.from('gallery').delete().eq('id', id);
-                alert("삭제되었습니다.");
-                location.href = 'culture.html';
+            // [CASE 4] 링크가 이상할 때
+            else {
+                 mediaArea.innerHTML = `
+                    <div style="color:white; padding:20px; text-align:center;">
+                        <h3 style="color:yellow;">⚠️ 링크 인식 실패</h3>
+                        <p>입력된 주소: ${fileUrl}</p>
+                        <p>유튜브 링크가 맞는지 확인해주세요.</p>
+                    </div>`;
             }
-        }
 
-        loadPost();
-    </script>
+        } catch (err) {
+            alert("오류: " + err.message);
+        }
+    }
+
+    // 수정/삭제 기능
+    function goEdit() { location.href = `gallery_write.html?id=${id}`; }
+    async function deletePost() {
+        if(confirm("삭제하시겠습니까?")) {
+            await sb.from('gallery').delete().eq('id', id);
+            location.href = 'culture.html';
+        }
+    }
+
+    loadPost();
+</script>
 </body>
+
 </html>
