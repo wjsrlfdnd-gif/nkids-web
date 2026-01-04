@@ -1,4 +1,4 @@
-// manager.js - 모바일 삼선 메뉴(햄버거) 기능 추가 완료
+// manager.js - 모바일 메뉴 접기/펴기(아코디언) 기능 완벽 구현
 
 // [1] 설정값
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbz68tFmFB7IuCEhLIgnm4RMuqiYlXzdgqDVikGFOODFVuh9wXfdOL4aZ4VFy-7HAsVPjQ/exec";
@@ -28,7 +28,7 @@ async function loadDataFromSheet() {
 }
 
 function loadHeader() {
-    // 1. 스타일 정의 (모바일 반응형 포함)
+    // 1. 스타일 정의
     const style = document.createElement('style');
     style.innerHTML = `
         /* [PC 기본 스타일] */
@@ -44,53 +44,63 @@ function loadHeader() {
         .logo-link { display: flex; align-items: center; height: 100%; }
         .logo-img { max-height: 45px; width: auto; }
 
-        /* 메뉴 리스트 */
+        /* PC 메뉴 */
         ul.nav-menu { list-style: none; margin: 0; padding: 0; display: flex; gap: 30px; }
         .nav-menu > li { position: relative; padding: 20px 0; }
-        .nav-menu > li > a { font-size: 1.05rem; color: #333; text-decoration: none; font-weight: 600; }
+        .nav-menu > li > a { font-size: 1.05rem; color: #333; text-decoration: none; font-weight: 600; cursor: pointer; }
         .nav-menu > li > a:hover { color: #f4a261; }
 
-        /* 드롭다운 */
+        /* PC 드롭다운 (호버 시 보임) */
         .dropdown {
             display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
             background: white; min-width: 160px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             border-radius: 8px; border: 1px solid #eee; padding: 5px 0; list-style: none; z-index: 9999;
         }
-        .nav-menu li:hover .dropdown { display: block; }
+        /* PC에서는 마우스 올리면(hover) 보임 */
+        @media (min-width: 769px) {
+            .nav-menu li:hover .dropdown { display: block; }
+        }
+        
         .dropdown li a { display: block; padding: 10px 15px; font-size: 0.95rem; color: #555; text-decoration: none; text-align: center;}
         .dropdown li a:hover { background: #f8f9fa; color: #f4a261; font-weight: bold; }
 
-        /* 삼선 메뉴 버튼 (PC에서는 숨김) */
+        /* 삼선 버튼 (기본 숨김) */
         .mobile-btn { display: none; font-size: 1.8rem; background: none; border: none; cursor: pointer; color: #1a3c6e; }
 
         /* [★ 모바일 전용 스타일 ★] */
         @media (max-width: 768px) {
-            /* 삼선 버튼 보이기 */
             .mobile-btn { display: block; }
 
-            /* 메뉴 숨기기 (기본) */
+            /* 전체 메뉴 패널 (기본 숨김) */
             .nav-menu {
-                display: none; 
+                display: none; /* 여기가 핵심: 평소에 안 보임 */
                 flex-direction: column; 
                 position: absolute; 
                 top: 70px; left: 0; width: 100%; 
                 background: white; 
-                box-shadow: 0 10px 10px rgba(0,0,0,0.05);
+                box-shadow: 0 10px 10px rgba(0,0,0,0.1);
                 padding: 0; gap: 0;
             }
             
-            /* 메뉴 열렸을 때 (.active 클래스 추가시) */
+            /* 삼선 버튼 누르면 보임 */
             .nav-menu.active { display: flex; }
 
-            .nav-menu > li { width: 100%; text-align: center; padding: 15px 0; border-bottom: 1px solid #f0f0f0; }
-            
-            /* 모바일에서 드롭다운은 항상 보이게 하거나 클릭으로 처리 (여기선 펼쳐서 보여줌) */
-            .nav-menu li:hover .dropdown { display: none; } /* 호버 끄기 */
+            .nav-menu > li { width: 100%; text-align: center; padding: 0; border-bottom: 1px solid #f0f0f0; }
+            .nav-menu > li > a { display: block; padding: 15px 0; width: 100%; }
+
+            /* [모바일 드롭다운 제어] */
+            /* 1. 기본적으로 숨김 */
             .dropdown { 
-                display: block; position: static; transform: none; 
-                box-shadow: none; border: none; background: #f8f9fa; width: 100%; margin-top: 10px;
+                display: none !important; /* PC hover 무시하고 강제 숨김 */
+                position: static; transform: none; 
+                box-shadow: none; border: none; background: #f8f9fa; width: 100%; margin: 0;
             }
-            .dropdown li a { padding: 10px 0; font-size: 0.9rem; color: #666; }
+            
+            /* 2. 클릭해서 열렸을 때만 보임 (.sub-open 클래스 붙으면) */
+            .sub-open .dropdown { display: block !important; }
+            
+            /* 열린 메뉴 색상 강조 */
+            .sub-open > a { color: #f4a261; font-weight: bold; }
         }
         
         .highlight-menu { color: #1a3c6e !important; font-weight: 700 !important; }
@@ -98,7 +108,7 @@ function loadHeader() {
     `;
     document.head.appendChild(style);
 
-    // 2. HTML 구조 생성 (삼선 버튼 추가)
+    // 2. HTML 생성
     const headerEl = document.querySelector('header');
     if(headerEl) {
         headerEl.innerHTML = `
@@ -113,7 +123,7 @@ function loadHeader() {
                     <li><a href="index.html">홈으로</a></li>
                     
                     <li>
-                        <a href="javascript:void(0)" style="cursor:default;">교재소개 ▾</a>
+                        <a href="javascript:void(0)" onclick="toggleSubMenu(this)">교재소개 ▾</a>
                         <ul class="dropdown">
                             <li><a href="infant.html">👶 영아반 (Standard)</a></li>
                             <li><a href="child.html">🧒 유아반 (Premium)</a></li>
@@ -121,7 +131,7 @@ function loadHeader() {
                     </li>
 
                     <li>
-                        <a href="javascript:void(0)" style="cursor:default;">행사프로그램 ▾</a>
+                        <a href="javascript:void(0)" onclick="toggleSubMenu(this)">행사프로그램 ▾</a>
                         <ul class="dropdown">
                             <li><a href="season.html">🎉 시즌 테마 행사</a></li>
                             <li><a href="culture.html">🌍 원어민 문화 체험</a></li>
@@ -137,11 +147,30 @@ function loadHeader() {
     }
 }
 
-// [모바일 메뉴 토글 함수]
+// [기능 1] 삼선 메뉴 전체 토글
 function toggleMenu() {
     const menu = document.getElementById('navMenu');
-    // active 클래스를 껐다 켰다 함 (CSS에서 display: flex로 변함)
     menu.classList.toggle('active');
+}
+
+// [기능 2] 모바일 하위 메뉴(드롭다운) 토글
+function toggleSubMenu(element) {
+    // 모바일 화면(폭 768px 이하)에서만 동작하도록 제한
+    if (window.innerWidth <= 768) {
+        const parentLi = element.parentElement; // 클릭한 a태그의 부모 li
+        
+        // 이미 열려있으면? -> 닫기
+        if (parentLi.classList.contains('sub-open')) {
+            parentLi.classList.remove('sub-open');
+        } 
+        // 닫혀있으면? -> 열기
+        else {
+            // (선택사항) 다른 메뉴들은 다 닫고 이것만 열고 싶으면 아래 주석 해제
+            // document.querySelectorAll('.sub-open').forEach(el => el.classList.remove('sub-open'));
+            
+            parentLi.classList.add('sub-open');
+        }
+    }
 }
 
 function loadFooter() {
