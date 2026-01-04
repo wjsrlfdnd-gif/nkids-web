@@ -277,34 +277,50 @@
     <script src="manager.js"></script>
 
     <script>
-        // [1] Supabase 설정 (보안상 manager.js와 동일한 키 사용)
-        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co"; // 본인 URL
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ"; // 본인 Key
+        // [중요] 페이지가 다 로딩된 후 실행
+        document.addEventListener("DOMContentLoaded", async function () {
 
-        let sb_culture;
-        if (typeof supabase !== 'undefined') {
-            sb_culture = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
+            // 1. 잠시 대기 (manager.js가 Supabase를 연결할 시간을 줌)
+            setTimeout(async () => {
+                const sb = window.sb; // manager.js에서 만든 Supabase 연결 가져오기
 
-        // [2] 데이터 불러오기
-        async function loadCulture() {
-            if (!sb_culture) return;
+                if (!sb) {
+                    console.error("Supabase가 연결되지 않았습니다. manager.js 설정을 확인하세요.");
+                    return;
+                }
 
-            // 관리자 로그인 체크
-            const { data: { session } } = await sb_culture.auth.getSession();
-            const isAdmin = !!session;
+                // 2. 현재 로그인 상태 확인
+                const { data: { session } } = await sb.auth.getSession();
 
-            if (isAdmin) {
-                document.getElementById('admin-panel').style.display = 'block'; // 관리자면 글쓰기 창 보임
-            }
+                // 3. 관리자라면? -> 글쓰기 패널 보여주기
+                if (session) {
+                    console.log("관리자 로그인 확인됨!");
+                    const panel = document.getElementById('admin-panel');
+                    if (panel) {
+                        panel.style.display = 'block'; // 숨겨진 창을 보이게 함
+                    } else {
+                        alert("주의: HTML에 'admin-panel' 아이디를 가진 div가 없습니다. 코드를 다시 확인해주세요.");
+                    }
+                } else {
+                    console.log("일반 방문자입니다.");
+                }
 
-            // 데이터 가져오기 (culture_posts 테이블)
-            const { data, error } = await sb_culture
+                // 4. 게시글 목록 불러오기
+                loadCulturePosts(sb, session);
+
+            }, 500); // 0.5초 대기
+        });
+
+        // 게시글 불러오기 함수
+        async function loadCulturePosts(sb, session) {
+            const list = document.getElementById('culture-list');
+            const isAdmin = !!session; // 세션이 있으면 true
+
+            const { data, error } = await sb
                 .from('culture_posts')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            const list = document.getElementById('culture-list');
             list.innerHTML = "";
 
             if (error || !data || data.length === 0) {
@@ -312,7 +328,6 @@
                 return;
             }
 
-            // HTML 그리기
             data.forEach(item => {
                 const date = item.created_at ? item.created_at.split('T')[0] : "";
                 const imgUrl = item.image_url || 'https://via.placeholder.com/400x300?text=No+Image';
@@ -320,27 +335,30 @@
                 const div = document.createElement('div');
                 div.className = 'card';
                 div.innerHTML = `
-                        <img src="${imgUrl}" class="card-img" onerror="this.src='https://via.placeholder.com/400x300?text=Error'">
-                        <div class="card-body">
-                            <div class="card-title">${item.title}</div>
-                            <div class="card-text">${item.content}</div>
-                            <div class="card-date">${date}</div>
-                            ${isAdmin ? `<button onclick="deletePost(${item.id})" class="btn-action btn-delete">삭제</button>` : ''}
-                        </div>
-                    `;
+                    <img src="${imgUrl}" class="card-img" onerror="this.src='https://via.placeholder.com/400x300?text=Error'">
+                    <div class="card-body">
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-text">${item.content}</div>
+                        <div class="card-date">${date}</div>
+                        ${isAdmin ? `<button onclick="deletePost(${item.id})" class="btn-action btn-delete">삭제</button>` : ''}
+                    </div>
+                `;
                 list.appendChild(div);
             });
         }
 
-        // [3] 글 저장 (관리자용)
+        // 글 저장 (관리자용)
         async function savePost() {
+            const sb = window.sb;
+            if (!sb) return;
+
             const title = document.getElementById('post-title').value;
             const content = document.getElementById('post-content').value;
             const image = document.getElementById('post-image').value;
 
             if (!title || !content) return alert("제목과 내용은 필수입니다.");
 
-            const { error } = await sb_culture
+            const { error } = await sb
                 .from('culture_posts')
                 .insert([{ title, content, image_url: image }]);
 
@@ -351,11 +369,12 @@
             }
         }
 
-        // [4] 글 삭제 (관리자용)
+        // 글 삭제 (관리자용)
         async function deletePost(id) {
             if (!confirm("정말 삭제하시겠습니까?")) return;
+            const sb = window.sb;
 
-            const { error } = await sb_culture
+            const { error } = await sb
                 .from('culture_posts')
                 .delete()
                 .eq('id', id);
@@ -363,9 +382,6 @@
             if (error) alert("삭제 실패");
             else location.reload();
         }
-
-        // 실행
-        loadCulture();
     </script>
 </body>
 </html>
