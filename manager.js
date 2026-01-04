@@ -164,6 +164,36 @@ function loadFooter() {
     }
 }
 
+/* [팝업(모달) 스타일] */
+.modal - overlay {
+    display: none; /* 평소엔 숨김 */
+    position: fixed; top: 0; left: 0; width: 100 %; height: 100 %;
+    background: rgba(0, 0, 0, 0.7); z - index: 10000;
+    justify - content: center; align - items: center;
+}
+.modal - content {
+    background: white; width: 90 %; max - width: 600px; max - height: 90vh;
+    border - radius: 15px; overflow - y: auto; position: relative;
+    animation: slideUp 0.3s ease - out;
+}
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal - header { position: relative; }
+.modal - img { width: 100 %; height: auto; display: block; }
+.close - btn {
+    position: absolute; top: 15px; right: 15px;
+    background: rgba(0, 0, 0, 0.5); color: white; border: none;
+    width: 30px; height: 30px; border - radius: 50 %; font - size: 20px;
+    cursor: pointer; display: flex; align - items: center; justify - content: center;
+}
+.modal - body { padding: 30px; }
+.modal - title { font - size: 1.5rem; font - weight: bold; margin - bottom: 15px; color: var(--primary - color); }
+.modal - text { font - size: 1rem; color: #444; white - space: pre - wrap; line - height: 1.7; }
+.modal - date { margin - top: 20px; font - size: 0.85rem; color: #999; text - align: right; border - top: 1px solid #eee; padding - top: 10px; }
+
+/* 카드에 커서 손가락 모양 추가 */
+.card { cursor: pointer; }
+
 // [4] 관리자 로그인 함수
 let clickCount = 0;
 window.handleAdminLogin = async function () {

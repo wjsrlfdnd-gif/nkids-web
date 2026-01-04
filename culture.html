@@ -277,6 +277,122 @@
     <script src="manager.js"></script>
 
     <script>
+        // 페이지 로드 시 실행
+            document.addEventListener("DOMContentLoaded", async function() {
+                setTimeout(async () => {
+                    const sb = window.sb;
+                    if (!sb) return console.error("Supabase 미연결");
+
+                    // 로그인 체크
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (session) {
+                        const panel = document.getElementById('admin-panel');
+                        if (panel) panel.style.display = 'block';
+                    }
+
+                    // 목록 불러오기 실행
+                    loadCulturePosts(sb, session);
+                }, 500);
+        });
+
+            // [게시글 목록 불러오기 + 클릭 이벤트 추가됨]
+            async function loadCulturePosts(sb, session) {
+            const list = document.getElementById('culture-list');
+            const isAdmin = !!session;
+
+            const {data, error} = await sb
+            .from('culture_posts')
+            .select('*')
+            .order('created_at', {ascending: false });
+
+            list.innerHTML = "";
+
+            if (error || !data || data.length === 0) {
+                list.innerHTML = `<div style="text-align:center; grid-column:1/-1; padding:50px;">등록된 게시글이 없습니다.</div>`;
+            return;
+            }
+
+            data.forEach(item => {
+                const date = item.created_at ? item.created_at.split('T')[0] : "";
+            const imgUrl = item.image_url || 'https://via.placeholder.com/400x300?text=No+Image';
+
+            const div = document.createElement('div');
+            div.className = 'card';
+
+                // ★ 클릭하면 팝업 열기 (openModal 함수 실행)
+                div.onclick = () => openModal(item);
+
+            div.innerHTML = `
+            <img src="${imgUrl}" class="card-img" onerror="this.src='https://via.placeholder.com/400x300?text=Error'">
+                <div class="card-body">
+                    <div class="card-title">${item.title}</div>
+                    <div class="card-text" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${item.content}</div>
+                    <div class="card-date">${date}</div>
+                    ${isAdmin ? `<button onclick="deletePost(event, ${item.id})" class="btn-action btn-delete">삭제</button>` : ''}
+                </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+                // [팝업 열기 함수]
+                function openModal(item) {
+                    document.getElementById('modal-title').innerText = item.title;
+                document.getElementById('modal-text').innerText = item.content;
+                document.getElementById('modal-date').innerText = item.created_at.split('T')[0];
+
+                const imgEl = document.getElementById('modal-img');
+                if (item.image_url) {
+                    imgEl.src = item.image_url;
+                imgEl.style.display = 'block';
+            } else {
+                    imgEl.style.display = 'none';
+            }
+
+                document.getElementById('post-modal').style.display = 'flex'; // 팝업 보이기
+                document.body.style.overflow = 'hidden'; // 뒤쪽 스크롤 막기
+        }
+
+                // [팝업 닫기 함수]
+                function closeModal(event) {
+            // 검은 배경(overlay)이나 닫기버튼을 눌렀을 때만 닫힘
+            if (event.target === event.currentTarget || event.target.classList.contains('close-btn')) {
+                    document.getElementById('post-modal').style.display = 'none';
+                document.body.style.overflow = 'auto'; // 스크롤 풀기
+            }
+        }
+
+                // [글 저장]
+                async function savePost() {
+            const sb = window.sb;
+                if (!sb) return;
+
+                const title = document.getElementById('post-title').value;
+                const content = document.getElementById('post-content').value;
+                const image = document.getElementById('post-image').value;
+
+                if (!title || !content) return alert("제목과 내용은 필수입니다.");
+
+                const {error} = await sb
+                .from('culture_posts')
+                .insert([{title, content, image_url: image }]);
+
+                if (error) alert("저장 실패: " + error.message);
+                else {alert("등록되었습니다!"); location.reload(); }
+        }
+
+                // [글 삭제] - event.stopPropagation() 중요!
+                async function deletePost(event, id) {
+                    event.stopPropagation(); // ★ 중요: 삭제 버튼 누를 때 팝업이 뜨지 않게 막음
+
+                if (!confirm("정말 삭제하시겠습니까?")) return;
+                const sb = window.sb;
+
+                const {error} = await sb.from('culture_posts').delete().eq('id', id);
+                if (error) alert("삭제 실패");
+                else location.reload();
+        }
+    
         // [중요] 페이지가 다 로딩된 후 실행
         document.addEventListener("DOMContentLoaded", async function () {
 
