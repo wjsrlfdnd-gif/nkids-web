@@ -1,4 +1,4 @@
-// manager.js - 모바일 삼선 메뉴 클릭 시 펼쳐짐 + 하위 메뉴 아코디언 기능
+// manager.js - 모바일 메뉴 클릭 반응 개선 (window 객체 사용)
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbz68tFmFB7IuCEhLIgnm4RMuqiYlXzdgqDVikGFOODFVuh9wXfdOL4aZ4VFy-7HAsVPjQ/exec";
 const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/nkids-web/logo.png"; 
@@ -10,6 +10,7 @@ const DEFAULT_INFO = {
     phone: "010-2333-2563 / 010-5522-8109"
 };
 
+// [1] 데이터 로딩
 async function loadDataFromSheet() {
     try {
         const response = await fetch(SHEET_URL);
@@ -26,6 +27,7 @@ async function loadDataFromSheet() {
     } catch (error) { console.error("엑셀 연동 실패:", error); }
 }
 
+// [2] 헤더 생성
 function loadHeader() {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -33,7 +35,7 @@ function loadHeader() {
         header { 
             width: 100%; height: 70px; background-color: #fff; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-            position: fixed; top: 0; left: 0; z-index: 1000; 
+            position: fixed; top: 0; left: 0; z-index: 9999; /* z-index 최상위로 올림 */
         }
         .header-inner { 
             display: flex; justify-content: space-between; align-items: center; 
@@ -63,24 +65,24 @@ function loadHeader() {
         /* 삼선 버튼 (PC 숨김) */
         .mobile-btn { display: none; font-size: 1.8rem; background: none; border: none; cursor: pointer; color: #1a3c6e; padding: 10px; }
 
-        /* [★ 모바일 전용 스타일 ★] */
+        /* [★ 모바일 전용 스타일 - 우선순위 강화 ★] */
         @media (max-width: 768px) {
-            .mobile-btn { display: block; } /* 삼선 버튼 보이기 */
+            .mobile-btn { display: block !important; }
 
-            /* 메뉴 패널: 평소엔 안 보임(display: none) */
+            /* 메뉴 패널: 평소엔 안 보임 */
             .nav-menu {
-                display: none; 
+                display: none !important; /* 강제 숨김 */
                 flex-direction: column; 
                 position: absolute; 
                 top: 70px; left: 0; width: 100%; 
                 background: white; 
-                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
                 border-top: 1px solid #eee;
                 padding: 0; gap: 0;
             }
             
-            /* [중요] active 클래스가 붙으면 보임 (display: flex) */
-            .nav-menu.active { display: flex; }
+            /* [중요] active 클래스가 붙으면 무조건 보임 */
+            .nav-menu.active { display: flex !important; }
 
             .nav-menu > li { width: 100%; text-align: center; padding: 0; border-bottom: 1px solid #f9f9f9; }
             .nav-menu > li > a { display: block; padding: 15px 0; width: 100%; }
@@ -108,13 +110,13 @@ function loadHeader() {
                     <img src="${LOGO_IMAGE_URL}" alt="NEW KIDS" class="logo-img">
                 </a>
 
-                <button class="mobile-btn" onclick="toggleMenu()">☰</button>
+                <button class="mobile-btn" onclick="window.toggleMenu()">☰</button>
 
                 <ul class="nav-menu" id="navMenu">
                     <li><a href="index.html">홈으로</a></li>
                     
                     <li>
-                        <a href="javascript:void(0)" onclick="toggleSubMenu(this)">교재소개 ▾</a>
+                        <a href="javascript:void(0)" onclick="window.toggleSubMenu(this)">교재소개 ▾</a>
                         <ul class="dropdown">
                             <li><a href="infant.html">👶 영아반 (Standard)</a></li>
                             <li><a href="child.html">🧒 유아반 (Premium)</a></li>
@@ -122,7 +124,7 @@ function loadHeader() {
                     </li>
 
                     <li>
-                        <a href="javascript:void(0)" onclick="toggleSubMenu(this)">행사프로그램 ▾</a>
+                        <a href="javascript:void(0)" onclick="window.toggleSubMenu(this)">행사프로그램 ▾</a>
                         <ul class="dropdown">
                             <li><a href="season.html">🎉 시즌 테마 행사</a></li>
                             <li><a href="culture.html">🌍 원어민 문화 체험</a></li>
@@ -138,20 +140,26 @@ function loadHeader() {
     }
 }
 
-// [핵심 기능 1] 삼선 버튼 누르면 메뉴 전체 펼치기/접기
-function toggleMenu() {
+// [핵심 기능 1] 삼선 메뉴 토글 (전역 window 객체에 등록하여 인식 오류 방지)
+window.toggleMenu = function() {
+    console.log("메뉴 버튼 클릭됨"); // F12 콘솔 확인용
     const menu = document.getElementById('navMenu');
-    menu.classList.toggle('active'); // active 클래스를 넣었다 뺐다 함
-}
+    if (menu) {
+        menu.classList.toggle('active');
+    } else {
+        console.error("메뉴 ID(navMenu)를 찾을 수 없습니다.");
+    }
+};
 
-// [핵심 기능 2] 하위 메뉴 펼치기/접기
-function toggleSubMenu(element) {
+// [핵심 기능 2] 하위 메뉴 토글
+window.toggleSubMenu = function(element) {
     if (window.innerWidth <= 768) {
         const parentLi = element.parentElement;
         parentLi.classList.toggle('sub-open');
     }
-}
+};
 
+// [3] 푸터 생성
 function loadFooter() {
     const footerEl = document.querySelector('footer');
     if(footerEl) {
@@ -167,6 +175,7 @@ function loadFooter() {
     }
 }
 
+// 실행
 document.addEventListener("DOMContentLoaded", function() {
     loadHeader();
     loadFooter();
