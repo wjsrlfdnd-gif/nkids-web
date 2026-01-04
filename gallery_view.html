@@ -11,8 +11,7 @@
             font-family: 'Pretendard', sans-serif; 
             background: #f0f2f5; 
             margin: 0;
-            /* ★헤더 높이(70px) + 여백(30px) 만큼 띄워줍니다★ */
-            padding-top: 100px; 
+            padding-top: 100px; /* 헤더 공간 확보 */
             padding-bottom: 50px;
         }
 
@@ -25,13 +24,44 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
         }
         
-        /* 미디어 영역 (사진/영상/유튜브) */
+        /* [★수정됨] 미디어 영역 (기본 틀) */
         .view-media { 
-            width: 100%; margin-bottom: 30px; border-radius: 10px; overflow: hidden; 
-            background: #000; display:flex; justify-content:center; align-items: center;
-            min-height: 300px; 
+            width: 100%; 
+            margin-bottom: 30px; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            background: #000; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            /* 최소 높이 제거 (내용물에 맞춤) */
         }
-        .view-media img, .view-media video { max-width: 100%; max-height: 600px; object-fit: contain; }
+        
+        /* 이미지와 일반 동영상은 너비 100%로 맞춤 */
+        .view-media img, .view-media video { 
+            width: 100%; 
+            height: auto; 
+            max-height: 600px; 
+            object-fit: contain; 
+        }
+
+        /* [★추가됨] 유튜브용 반응형 컨테이너 (16:9 비율 고정) */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 비율 유지 (9 / 16 = 0.5625) */
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
         
         .view-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 15px; color: #1a3c6e; }
         .view-meta { color: #888; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 30px; font-size: 0.95rem; }
@@ -48,8 +78,13 @@
         .btn-delete { background: #e76f51; color: white; padding: 12px 20px; border:none; border-radius: 5px; cursor:pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; }
         .btn-delete:hover { background: #c0392b; }
         
-        /* 푸터 스타일 (manager.js가 채워줌) */
         footer { background: #222; color: #888; padding: 40px 0; text-align: center; margin-top: 50px; }
+
+        /* 모바일 여백 조정 */
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .view-title { font-size: 1.4rem; }
+        }
     </style>
 </head>
 <body>
@@ -58,7 +93,7 @@
 
     <div class="container">
         <div class="view-media" id="media-area">
-            <span style="color:white;">로딩 중...</span>
+            <span style="color:white; padding: 50px;">로딩 중...</span>
         </div>
 
         <div class="view-title" id="v-title">제목 로딩 중...</div>
@@ -67,7 +102,6 @@
 
         <div class="btn-group">
             <a href="culture.html" class="btn-list">목록으로</a>
-            
             <div class="btn-right">
                 <a href="javascript:void(0)" onclick="goEdit()" class="btn-edit">수정하기</a>
                 <button class="btn-delete" onclick="deletePost()">삭제하기</button>
@@ -76,7 +110,6 @@
     </div>
 
     <footer></footer>
-
     <script src="manager.js"></script>
 
     <script>
@@ -87,7 +120,6 @@
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
 
-        // 유튜브 ID 추출 함수
         function getYoutubeId(url) {
             if (!url) return null;
             const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
@@ -113,7 +145,7 @@
                 const mediaArea = document.getElementById('media-area');
                 const youtubeId = getYoutubeId(fileUrl);
                 
-                // [CASE 1] 유튜브 링크
+                // [CASE 1] 유튜브 링크 (반응형 적용)
                 if (youtubeId) {
                     const origin = window.location.origin;
                     
@@ -124,25 +156,27 @@
                                 <p>GitHub에 올린 뒤 인터넷 주소로 접속하세요.</p>
                             </div>`;
                     } else {
+                        // ★ 반응형 div(video-container)로 감싸기 ★
                         mediaArea.innerHTML = `
-                            <iframe width="100%" height="500" 
-                                src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1&origin=${origin}" 
-                                title="YouTube video player" frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                                referrerpolicy="strict-origin-when-cross-origin"
-                                allowfullscreen>
-                            </iframe>`;
+                            <div class="video-container">
+                                <iframe 
+                                    src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1&origin=${origin}" 
+                                    title="YouTube video player" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen>
+                                </iframe>
+                            </div>`;
                     }
                 } 
                 // [CASE 2] 직접 올린 파일
                 else if (fileUrl.includes('.mp4') || fileUrl.includes('.mov')) {
-                    mediaArea.innerHTML = `<video src="${fileUrl}" controls autoplay muted playsinline style="width:100%; max-height:500px;"></video>`;
+                    mediaArea.innerHTML = `<video src="${fileUrl}" controls autoplay muted playsinline></video>`;
                 } 
                 // [CASE 3] 이미지
                 else if (fileUrl) {
                     mediaArea.innerHTML = `<img src="${fileUrl}" alt="상세 이미지">`;
                 }
-                // [CASE 4] 없음
                 else {
                     mediaArea.innerHTML = `<span style="color:#aaa;">이미지가 없는 게시물입니다.</span>`;
                 }
