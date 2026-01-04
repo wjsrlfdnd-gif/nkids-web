@@ -132,7 +132,7 @@ function loadHeader() {
                         </ul>
                     </li>
 
-                    <li><a href="board.html" class="highlight-menu">📢 소통 게시판</a></li>
+                    
                     <li><a href="proposal.html" class="cta-menu">견적요청</a></li>
                 </ul>
             </div>
@@ -187,3 +187,4 @@ document.addEventListener("DOMContentLoaded", function() {
         callBtns.forEach(btn => btn.href = "tel:" + phoneTxt.replace(/-/g, ""));
     }, 1000); 
 });
+
