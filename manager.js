@@ -1,6 +1,5 @@
-// manager.js - 모바일 메뉴 접기/펴기(아코디언) 기능 완벽 구현
+// manager.js - 모바일 삼선 메뉴 클릭 시 펼쳐짐 + 하위 메뉴 아코디언 기능
 
-// [1] 설정값
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbz68tFmFB7IuCEhLIgnm4RMuqiYlXzdgqDVikGFOODFVuh9wXfdOL4aZ4VFy-7HAsVPjQ/exec";
 const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/nkids-web/logo.png"; 
 
@@ -28,7 +27,6 @@ async function loadDataFromSheet() {
 }
 
 function loadHeader() {
-    // 1. 스타일 정의
     const style = document.createElement('style');
     style.innerHTML = `
         /* [PC 기본 스타일] */
@@ -50,57 +48,51 @@ function loadHeader() {
         .nav-menu > li > a { font-size: 1.05rem; color: #333; text-decoration: none; font-weight: 600; cursor: pointer; }
         .nav-menu > li > a:hover { color: #f4a261; }
 
-        /* PC 드롭다운 (호버 시 보임) */
+        /* PC 드롭다운 */
         .dropdown {
             display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
             background: white; min-width: 160px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             border-radius: 8px; border: 1px solid #eee; padding: 5px 0; list-style: none; z-index: 9999;
         }
-        /* PC에서는 마우스 올리면(hover) 보임 */
         @media (min-width: 769px) {
             .nav-menu li:hover .dropdown { display: block; }
         }
-        
         .dropdown li a { display: block; padding: 10px 15px; font-size: 0.95rem; color: #555; text-decoration: none; text-align: center;}
         .dropdown li a:hover { background: #f8f9fa; color: #f4a261; font-weight: bold; }
 
-        /* 삼선 버튼 (기본 숨김) */
-        .mobile-btn { display: none; font-size: 1.8rem; background: none; border: none; cursor: pointer; color: #1a3c6e; }
+        /* 삼선 버튼 (PC 숨김) */
+        .mobile-btn { display: none; font-size: 1.8rem; background: none; border: none; cursor: pointer; color: #1a3c6e; padding: 10px; }
 
         /* [★ 모바일 전용 스타일 ★] */
         @media (max-width: 768px) {
-            .mobile-btn { display: block; }
+            .mobile-btn { display: block; } /* 삼선 버튼 보이기 */
 
-            /* 전체 메뉴 패널 (기본 숨김) */
+            /* 메뉴 패널: 평소엔 안 보임(display: none) */
             .nav-menu {
-                display: none; /* 여기가 핵심: 평소에 안 보임 */
+                display: none; 
                 flex-direction: column; 
                 position: absolute; 
                 top: 70px; left: 0; width: 100%; 
                 background: white; 
-                box-shadow: 0 10px 10px rgba(0,0,0,0.1);
+                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+                border-top: 1px solid #eee;
                 padding: 0; gap: 0;
             }
             
-            /* 삼선 버튼 누르면 보임 */
+            /* [중요] active 클래스가 붙으면 보임 (display: flex) */
             .nav-menu.active { display: flex; }
 
-            .nav-menu > li { width: 100%; text-align: center; padding: 0; border-bottom: 1px solid #f0f0f0; }
+            .nav-menu > li { width: 100%; text-align: center; padding: 0; border-bottom: 1px solid #f9f9f9; }
             .nav-menu > li > a { display: block; padding: 15px 0; width: 100%; }
 
-            /* [모바일 드롭다운 제어] */
-            /* 1. 기본적으로 숨김 */
+            /* 하위 메뉴(드롭다운) 숨김/표시 */
             .dropdown { 
-                display: none !important; /* PC hover 무시하고 강제 숨김 */
+                display: none !important; 
                 position: static; transform: none; 
                 box-shadow: none; border: none; background: #f8f9fa; width: 100%; margin: 0;
             }
-            
-            /* 2. 클릭해서 열렸을 때만 보임 (.sub-open 클래스 붙으면) */
             .sub-open .dropdown { display: block !important; }
-            
-            /* 열린 메뉴 색상 강조 */
-            .sub-open > a { color: #f4a261; font-weight: bold; }
+            .sub-open > a { color: #f4a261; font-weight: bold; background: #fffbf5; }
         }
         
         .highlight-menu { color: #1a3c6e !important; font-weight: 700 !important; }
@@ -108,7 +100,6 @@ function loadHeader() {
     `;
     document.head.appendChild(style);
 
-    // 2. HTML 생성
     const headerEl = document.querySelector('header');
     if(headerEl) {
         headerEl.innerHTML = `
@@ -147,29 +138,17 @@ function loadHeader() {
     }
 }
 
-// [기능 1] 삼선 메뉴 전체 토글
+// [핵심 기능 1] 삼선 버튼 누르면 메뉴 전체 펼치기/접기
 function toggleMenu() {
     const menu = document.getElementById('navMenu');
-    menu.classList.toggle('active');
+    menu.classList.toggle('active'); // active 클래스를 넣었다 뺐다 함
 }
 
-// [기능 2] 모바일 하위 메뉴(드롭다운) 토글
+// [핵심 기능 2] 하위 메뉴 펼치기/접기
 function toggleSubMenu(element) {
-    // 모바일 화면(폭 768px 이하)에서만 동작하도록 제한
     if (window.innerWidth <= 768) {
-        const parentLi = element.parentElement; // 클릭한 a태그의 부모 li
-        
-        // 이미 열려있으면? -> 닫기
-        if (parentLi.classList.contains('sub-open')) {
-            parentLi.classList.remove('sub-open');
-        } 
-        // 닫혀있으면? -> 열기
-        else {
-            // (선택사항) 다른 메뉴들은 다 닫고 이것만 열고 싶으면 아래 주석 해제
-            // document.querySelectorAll('.sub-open').forEach(el => el.classList.remove('sub-open'));
-            
-            parentLi.classList.add('sub-open');
-        }
+        const parentLi = element.parentElement;
+        parentLi.classList.toggle('sub-open');
     }
 }
 
