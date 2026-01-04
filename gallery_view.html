@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -6,223 +6,161 @@
     <title>상세보기</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background: #f0f2f5;
-            padding: 20px;
+        /* [기본 폰트 및 배경] */
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            background: #f0f2f5; 
+            margin: 0;
+            /* ★헤더 높이(70px) + 여백(30px) 만큼 띄워줍니다★ */
+            padding-top: 100px; 
+            padding-bottom: 50px;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
         }
-
-        .view-media {
-            width: 100%;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 300px;
+        
+        /* 미디어 영역 (사진/영상/유튜브) */
+        .view-media { 
+            width: 100%; margin-bottom: 30px; border-radius: 10px; overflow: hidden; 
+            background: #000; display:flex; justify-content:center; align-items: center;
+            min-height: 300px; 
         }
+        .view-media img, .view-media video { max-width: 100%; max-height: 600px; object-fit: contain; }
+        
+        .view-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 15px; color: #1a3c6e; }
+        .view-meta { color: #888; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 30px; font-size: 0.95rem; }
+        .view-content { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; color: #444; min-height: 100px; }
+        
+        /* 버튼 스타일 */
+        .btn-group { margin-top: 40px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-list { background: #666; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .btn-list:hover { background: #555; }
 
-            .view-media img, .view-media video {
-                max-width: 100%;
-                max-height: 600px;
-                object-fit: contain;
-            }
-
-        .view-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .view-meta {
-            color: #888;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-
-        .view-content {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            color: #444;
-            min-height: 100px;
-        }
-
-        .btn-list {
-            background: #666;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            display: inline-block;
-            margin-top: 30px;
-            font-weight: bold;
-        }
-
-        .btn-edit {
-            background: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            float: right;
-            margin-top: 30px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-left: 10px; /* 삭제 버튼과 간격 */
-            text-decoration: none; /* a태그일 경우 밑줄 제거 */
-            font-size: 0.9rem; /* 버튼 폰트 크기 통일 */
-        }
-
-        .btn-delete {
-            background: #e76f51;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            float: right;
-            margin-top: 30px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .btn-right { display: flex; gap: 10px; }
+        .btn-edit { background: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 1rem; transition: 0.3s; }
+        .btn-edit:hover { background: #218838; }
+        .btn-delete { background: #e76f51; color: white; padding: 12px 20px; border:none; border-radius: 5px; cursor:pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; }
+        .btn-delete:hover { background: #c0392b; }
+        
+        /* 푸터 스타일 (manager.js가 채워줌) */
+        footer { background: #222; color: #888; padding: 40px 0; text-align: center; margin-top: 50px; }
     </style>
 </head>
 <body>
 
+    <header></header>
+
     <div class="container">
         <div class="view-media" id="media-area">
-            <span style="color:white;">이미지 로딩 대기...</span>
+            <span style="color:white;">로딩 중...</span>
         </div>
 
         <div class="view-title" id="v-title">제목 로딩 중...</div>
         <div class="view-meta" id="v-meta">정보 로딩 중...</div>
-        <div class="view-content" id="v-content">내용 로딩 중...</div>
+        <div class="view-content" id="v-content"></div>
 
-        <a href="culture.html" class="btn-list">목록으로</a>
-
-        <div style="float:right;">
-            <a href="javascript:void(0)" onclick="goEdit()" class="btn-edit">수정하기</a>
-            <button class="btn-delete" onclick="deletePost()">삭제하기</button>
+        <div class="btn-group">
+            <a href="culture.html" class="btn-list">목록으로</a>
+            
+            <div class="btn-right">
+                <a href="javascript:void(0)" onclick="goEdit()" class="btn-edit">수정하기</a>
+                <button class="btn-delete" onclick="deletePost()">삭제하기</button>
+            </div>
         </div>
     </div>
 
+    <footer></footer>
+
+    <script src="manager.js"></script>
+
     <script>
-    // [1] 설정값
-    const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_URL = "https://chmpykdpiwmotmfenirr.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNobXB5a2RwaXdtb3RtZmVuaXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MTQ0NDksImV4cCI6MjA4MzA5MDQ0OX0.vL8_JBLEWXgrvjtfcoZ5BeqFiIRhFKrItx47VzDdmjQ";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
 
-    // [헬퍼 함수] 유튜브 ID 추출 (더 강력한 버전)
-    function getYoutubeId(url) {
-        if (!url) return null;
-        // 1. 일반/모바일/임베드 주소 정규식
-        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-        const match = url.match(regExp);
-        if (match && match[7].length === 11) return match[7];
-        
-        // 2. Shorts 주소 대응
-        if (url.includes('/shorts/')) return url.split('/shorts/')[1].split('?')[0];
-        
-        // 3. 라이브 주소 등 대응
-        if (url.includes('/live/')) return url.split('/live/')[1].split('?')[0];
+        // 유튜브 ID 추출 함수
+        function getYoutubeId(url) {
+            if (!url) return null;
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            if (match && match[7].length === 11) return match[7];
+            if (url.includes('/shorts/')) return url.split('/shorts/')[1].split('?')[0];
+            return null;
+        }
 
-        return null;
-    }
+        async function loadPost() {
+            if (!id) { alert("잘못된 접근입니다."); location.href = 'culture.html'; return; }
 
-    async function loadPost() {
-        if (!id) { alert("잘못된 접근입니다."); location.href = 'culture.html'; return; }
+            try {
+                const { data, error } = await sb.from('gallery').select('*').eq('id', id).single();
+                if (error) throw error;
 
-        try {
-            const { data, error } = await sb.from('gallery').select('*').eq('id', id).single();
-            if (error) throw error;
+                document.getElementById('v-title').innerText = data.title;
+                const date = data.created_at ? data.created_at.split('T')[0] : "";
+                document.getElementById('v-meta').innerText = `작성자: ${data.writer} | 작성일: ${date}`;
+                document.getElementById('v-content').innerText = data.content;
 
-            document.getElementById('v-title').innerText = data.title;
-            const date = data.created_at ? data.created_at.split('T')[0] : "";
-            document.getElementById('v-meta').innerText = `작성자: ${data.writer} | 작성일: ${date}`;
-            document.getElementById('v-content').innerText = data.content;
-
-            const fileUrl = data.file_url || "";
-            const mediaArea = document.getElementById('media-area');
-            const youtubeId = getYoutubeId(fileUrl);
-            
-            // ★ 진단 메시지 출력 (화면에 보임) ★
-            console.log("원본 링크:", fileUrl);
-            console.log("추출된 ID:", youtubeId);
-
-            // [CASE 1] 유튜브 링크
-            if (youtubeId) {
-                // 현재 실행 환경 확인 (file:// 인지 https:// 인지)
-                const origin = window.location.origin;
+                const fileUrl = data.file_url || "";
+                const mediaArea = document.getElementById('media-area');
+                const youtubeId = getYoutubeId(fileUrl);
                 
-                if (origin.includes('file://')) {
-                     mediaArea.innerHTML = `
-                        <div style="color:white; text-align:center; padding:20px;">
-                            <h3 style="color:red;">⚠️ 컴퓨터 파일(file://) 상태에서는 재생불가!</h3>
-                            <p>유튜브 보안 정책 때문에 내 컴퓨터에서 더블클릭해서 열면 재생이 안 됩니다.</p>
-                            <p><strong>GitHub에 올린 뒤 인터넷 주소로 접속하세요.</strong></p>
-                            <p>추출된 ID: ${youtubeId}</p>
-                        </div>`;
-                } else {
-                    mediaArea.innerHTML = `
-                        <iframe width="100%" height="500" 
-                            src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1&origin=${origin}" 
-                            title="YouTube video player" frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            referrerpolicy="strict-origin-when-cross-origin"
-                            allowfullscreen>
-                        </iframe>`;
+                // [CASE 1] 유튜브 링크
+                if (youtubeId) {
+                    const origin = window.location.origin;
+                    
+                    if (origin.includes('file://')) {
+                         mediaArea.innerHTML = `
+                            <div style="color:white; text-align:center; padding:20px;">
+                                <h3 style="color:red;">⚠️ 컴퓨터 파일(file://) 상태에서는 재생불가!</h3>
+                                <p>GitHub에 올린 뒤 인터넷 주소로 접속하세요.</p>
+                            </div>`;
+                    } else {
+                        mediaArea.innerHTML = `
+                            <iframe width="100%" height="500" 
+                                src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1&origin=${origin}" 
+                                title="YouTube video player" frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allowfullscreen>
+                            </iframe>`;
+                    }
+                } 
+                // [CASE 2] 직접 올린 파일
+                else if (fileUrl.includes('.mp4') || fileUrl.includes('.mov')) {
+                    mediaArea.innerHTML = `<video src="${fileUrl}" controls autoplay muted playsinline style="width:100%; max-height:500px;"></video>`;
+                } 
+                // [CASE 3] 이미지
+                else if (fileUrl) {
+                    mediaArea.innerHTML = `<img src="${fileUrl}" alt="상세 이미지">`;
                 }
-            } 
-            // [CASE 2] 직접 올린 파일
-            else if (fileUrl.includes('.mp4') || fileUrl.includes('.mov')) {
-                mediaArea.innerHTML = `<video src="${fileUrl}" controls autoplay muted playsinline style="width:100%;"></video>`;
-            } 
-            // [CASE 3] 이미지
-            else if (fileUrl) {
-                mediaArea.innerHTML = `<img src="${fileUrl}" alt="이미지">`;
+                // [CASE 4] 없음
+                else {
+                    mediaArea.innerHTML = `<span style="color:#aaa;">이미지가 없는 게시물입니다.</span>`;
+                }
+
+            } catch (err) {
+                alert("오류: " + err.message);
             }
-            // [CASE 4] 링크가 이상할 때
-            else {
-                 mediaArea.innerHTML = `
-                    <div style="color:white; padding:20px; text-align:center;">
-                        <h3 style="color:yellow;">⚠️ 링크 인식 실패</h3>
-                        <p>입력된 주소: ${fileUrl}</p>
-                        <p>유튜브 링크가 맞는지 확인해주세요.</p>
-                    </div>`;
+        }
+
+        function goEdit() { location.href = `gallery_write.html?id=${id}`; }
+        async function deletePost() {
+            if(confirm("정말 삭제하시겠습니까?")) {
+                await sb.from('gallery').delete().eq('id', id);
+                location.href = 'culture.html';
             }
-
-        } catch (err) {
-            alert("오류: " + err.message);
         }
-    }
 
-    // 수정/삭제 기능
-    function goEdit() { location.href = `gallery_write.html?id=${id}`; }
-    async function deletePost() {
-        if(confirm("삭제하시겠습니까?")) {
-            await sb.from('gallery').delete().eq('id', id);
-            location.href = 'culture.html';
-        }
-    }
-
-    loadPost();
-</script>
+        loadPost();
+    </script>
 </body>
-
 </html>
