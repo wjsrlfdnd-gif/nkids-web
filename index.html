@@ -89,23 +89,19 @@
                 color: #fff;
                 margin-bottom: 10px;
             }
+        /* 하단 텍스트 삭제됨 */
 
-        .contact-info {
-            margin-top: 20px;
-            font-size: 1.1rem;
-            color: #e0e0e0;
-        }
-
-        /* [수정됨] 버튼 그룹 스타일 */
+        /* 버튼 그룹 스타일 */
         .btn-group {
             display: flex;
             gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 20px;
+            margin-top: 30px;
+            margin-bottom: 10px;
         }
 
-        /* 모바일에서는 버튼이 꽉 차게 보이도록 조정 */
+        /* 모바일 대응 */
         @media (max-width: 480px) {
             .btn-group {
                 flex-direction: column;
@@ -195,7 +191,6 @@
         <div class="container">
             <h2>궁금하신 점이 있으신가요?</h2>
             <p>원명과 연락처를 남겨주시면 자세한 상담을 도와드리겠습니다.</p>
-            <br>
 
             <div class="btn-group">
                 <a href="tel:010-2333-2563" class="btn mobile-only-link" style="background:#fff; color:var(--primary-color);">
@@ -206,9 +201,6 @@
                 </a>
             </div>
 
-            <div class="contact-info">
-                <p>문의: 010-2333-2563 / 010-5522-8109</p>
-            </div>
         </div>
     </section>
 
