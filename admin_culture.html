@@ -2,10 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>뉴키즈 - 문화체험 관리자 페이지</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         /* [관리자 페이지 전용 스타일] */
         body {
@@ -17,14 +15,14 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 100px 20px 50px;
+            padding: 40px 20px 80px;
         }
-        /* 헤더 공간 확보 */
+        /* 상단 여백 조정 */
 
         /* 로그인 박스 */
         #login-section {
             max-width: 400px;
-            margin: 50px auto;
+            margin: 80px auto;
             background: white;
             padding: 40px;
             border-radius: 10px;
@@ -40,11 +38,10 @@
                 border-radius: 5px;
             }
 
-        /* 관리자 패널 (글쓰기 + 목록) */
+        /* 관리자 패널 */
         #admin-section {
             display: none;
         }
-        /* 로그인 전 숨김 */
 
         .panel-box {
             background: white;
@@ -61,7 +58,6 @@
             padding-bottom: 10px;
         }
 
-        /* 입력 폼 */
         label {
             display: block;
             font-weight: bold;
@@ -69,7 +65,7 @@
             margin-top: 15px;
         }
 
-        input[type="text"], textarea {
+        input[type="text"], textarea, input[type="file"] {
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
@@ -108,7 +104,17 @@
             margin-top: 10px;
         }
 
-        /* 게시글 관리 목록 */
+        .btn-del {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        /* 목록 스타일 */
         .post-item {
             display: flex;
             justify-content: space-between;
@@ -131,21 +137,27 @@
             color: #888;
         }
 
-        .btn-del {
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            z-index: 999;
+            text-align: center;
+            padding-top: 200px;
+            font-weight: bold;
+            color: #1a3c6e;
+            font-size: 1.5rem;
         }
     </style>
 </head>
 <body>
+    <header></header> <div id="loading" class="loading-overlay">잠시만 기다려주세요...</div>
 
-    <header></header> <div class="container">
-
+    <div class="container">
         <div id="login-section">
             <h2 style="text-align:center; border:none;">🔒 관리자 로그인</h2>
             <input type="email" id="admin-email" placeholder="이메일">
@@ -156,13 +168,12 @@
         <div id="admin-section">
             <div class="panel-box">
                 <h2>📝 새 글 작성하기</h2>
-
                 <label>제목</label>
                 <input type="text" id="post-title" placeholder="제목을 입력하세요">
 
-                <label>이미지 주소 (URL)</label>
-                <input type="text" id="post-image" placeholder="https://...">
-                <p style="font-size:0.8rem; color:#888; margin-top:5px;">* 이미지가 없다면 비워두셔도 됩니다.</p>
+                <label>사진 첨부 (선택)</label>
+                <input type="file" id="post-file" accept="image/*">
+                <p style="font-size:0.8rem; color:#888; margin-top:5px;">* 사진을 선택하면 자동으로 서버에 저장됩니다.</p>
 
                 <label>내용</label>
                 <textarea id="post-content" placeholder="내용을 입력하세요"></textarea>
@@ -178,84 +189,100 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <footer></footer>
     <script src="manager.js"></script>
 
     <script>
-        // manager.js가 로드된 후 실행
-        document.addEventListener("DOMContentLoaded", function() {
-            setTimeout(() => {
-                const sb = window.sb;
-                if (!sb) { alert("Supabase 연결 실패!"); return; }
-
-                checkSession(sb); // 로그인 체크
-            }, 500);
+        // manager.js 로딩 대기 후 Supabase 연결 확인
+        document.addEventListener("DOMContentLoaded", function () {
+            const checkSb = setInterval(() => {
+                if (window.sb) {
+                    clearInterval(checkSb);
+                    checkSession(window.sb); // 로그인 체크 시작
+                }
+            }, 100); // 0.1초마다 체크
         });
 
-        // [로그인 체크]
+        // [로그인 상태 체크]
         async function checkSession(sb) {
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
-                // 로그인 됨 -> 입력폼 보여주기
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('admin-section').style.display = 'block';
-                loadManageList(sb); // 목록 불러오기
+                loadManageList(sb);
             } else {
-                // 로그인 안 됨 -> 로그인폼 보여주기
                 document.getElementById('login-section').style.display = 'block';
                 document.getElementById('admin-section').style.display = 'none';
             }
         }
 
-        // [로그인 함수]
+        // [로그인]
         async function adminLogin() {
             const sb = window.sb;
             const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
+            const { error } = await sb.auth.signInWithPassword({ email, password });
 
-            const { data, error } = await sb.auth.signInWithPassword({ email, password });
-            if (error) alert("로그인 실패: " + error.message);
+            if (error) alert("로그인 실패: 이메일이나 비밀번호를 확인하세요.");
             else location.reload();
         }
 
-        // [로그아웃 함수]
+        // [로그아웃]
         async function logout() {
             await window.sb.auth.signOut();
             location.reload();
         }
 
-        // [글 저장]
+        // [글 저장 (이미지 업로드 포함)]
         async function savePost() {
             const sb = window.sb;
             const title = document.getElementById('post-title').value;
             const content = document.getElementById('post-content').value;
-            const image = document.getElementById('post-image').value;
+            const fileInput = document.getElementById('post-file');
+            const file = fileInput.files[0];
 
             if (!title || !content) return alert("제목과 내용은 필수입니다.");
 
-            const { error } = await sb.from('culture_posts').insert([{ title, content, image_url: image }]);
+            // 로딩 표시
+            document.getElementById('loading').style.display = 'block';
 
-            if (error) alert("에러: " + error.message);
-            else {
+            let imageUrl = null;
+
+            try {
+                // 1. 이미지가 있다면 업로드
+                if (file) {
+                    const fileName = `culture_${Date.now()}_${file.name}`;
+                    const { error: uploadError } = await sb.storage.from('images').upload(fileName, file);
+                    if (uploadError) throw uploadError;
+
+                    // 이미지 주소 가져오기
+                    const { data: urlData } = sb.storage.from('images').getPublicUrl(fileName);
+                    imageUrl = urlData.publicUrl;
+                }
+
+                // 2. 게시글 저장
+                const { error: dbError } = await sb.from('culture_posts').insert([{
+                    title: title,
+                    content: content,
+                    image_url: imageUrl
+                }]);
+
+                if (dbError) throw dbError;
+
                 alert("업로드 완료!");
-                // 입력창 비우기
-                document.getElementById('post-title').value = "";
-                document.getElementById('post-content').value = "";
-                document.getElementById('post-image').value = "";
-                loadManageList(sb); // 목록 갱신
+                location.reload();
+
+            } catch (err) {
+                alert("오류 발생: " + err.message);
+                document.getElementById('loading').style.display = 'none';
             }
         }
 
-        // [관리용 목록 불러오기]
+        // [목록 불러오기]
         async function loadManageList(sb) {
-            const { data, error } = await sb
-                .from('culture_posts')
-                .select('*')
-                .order('created_at', { ascending: false });
-
+            const { data, error } = await sb.from('culture_posts').select('*').order('created_at', { ascending: false });
             const listDiv = document.getElementById('manage-list');
             listDiv.innerHTML = "";
 
@@ -267,27 +294,24 @@
             data.forEach(item => {
                 const date = item.created_at.split('T')[0];
                 listDiv.innerHTML += `
-                    <div class="post-item">
-                        <div class="post-info">
-                            <div class="post-title">${item.title}</div>
-                            <div class="post-date">${date}</div>
-                        </div>
-                        <button onclick="deletePost(${item.id})" class="btn-del">삭제</button>
-                    </div>
-                `;
+                        <div class="post-item">
+                            <div class="post-info">
+                                <div class="post-title">${item.title}</div>
+                                <div class="post-date">${date}</div>
+                            </div>
+                            <button onclick="deletePost(${item.id})" class="btn-del">삭제</button>
+                        </div>`;
             });
         }
 
-        // [글 삭제]
+        // [삭제]
         async function deletePost(id) {
-            if (!confirm("정말 삭제하시겠습니까? 복구할 수 없습니다.")) return;
-            const sb = window.sb;
-            const { error } = await sb.from('culture_posts').delete().eq('id', id);
-
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+            const { error } = await window.sb.from('culture_posts').delete().eq('id', id);
             if (error) alert("삭제 실패");
             else {
                 alert("삭제되었습니다.");
-                loadManageList(sb); // 목록 갱신
+                loadManageList(window.sb);
             }
         }
     </script>
