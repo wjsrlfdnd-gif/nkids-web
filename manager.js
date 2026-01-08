@@ -1,4 +1,4 @@
-// manager.js - 통합 관리자 (교재 메뉴 통합 링크 수정됨)
+// manager.js - 통합 관리자 (전화번호 오작동 수정됨)
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbz68tFmFB7IuCEhLIgnm4RMuqiYlXzdgqDVikGFOODFVuh9wXfdOL4aZ4VFy-7HAsVPjQ/exec";
 const LOGO_IMAGE_URL = "https://wjsrlfdnd-gif.github.io/nkids-web/logo.png";
@@ -133,11 +133,6 @@ function loadFooter() {
 
 document.addEventListener("DOMContentLoaded", function () {
     loadHeader(); loadFooter(); loadDataFromSheet();
-    setTimeout(() => {
-        const phoneTxt = document.getElementById('info_phone') ? document.getElementById('info_phone').innerText : DEFAULT_INFO.phone;
-        const callBtns = document.querySelectorAll('a[href^="tel:"]');
-        callBtns.forEach(btn => btn.href = "tel:" + phoneTxt.replace(/[^0-9]/g, ""));
-    }, 1000);
     document.addEventListener('click', function (e) {
         const menu = document.getElementById('navMenu');
         const btn = document.querySelector('.mobile-btn');
