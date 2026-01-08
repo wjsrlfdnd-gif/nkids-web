@@ -1,0 +1,333 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>뉴키즈 - 통합 관리자</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        #login-section {
+            max-width: 400px;
+            margin: 80px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+            #login-section input {
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+
+        #admin-section {
+            display: none;
+        }
+
+        .panel-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #1a3c6e;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            margin-top: 15px;
+        }
+
+        input[type="text"], textarea, input[type="file"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #1a3c6e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn-logout {
+            background: #666;
+            margin-top: 10px;
+        }
+
+        .btn-edit {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-right: 5px;
+        }
+
+        .btn-del {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-cancel {
+            background: #999;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .post-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+        }
+
+        .category-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: white;
+            margin-right: 10px;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            z-index: 999;
+            text-align: center;
+            padding-top: 200px;
+            font-weight: bold;
+            color: #1a3c6e;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header></header>
+    <div id="loading" class="loading-overlay">처리 중입니다...</div>
+    <div class="container">
+        <div id="login-section">
+            <h2>🔒 관리자 로그인</h2>
+            <input type="email" id="admin-email" placeholder="이메일">
+            <input type="password" id="admin-password" placeholder="비밀번호">
+            <button onclick="adminLogin()" class="btn-action">로그인</button>
+        </div>
+        <div id="admin-section">
+            <div class="panel-box">
+                <h2 id="form-title">📝 새 글 작성하기</h2>
+                <label>카테고리 선택</label>
+                <select id="post-category">
+                    <optgroup label="행사 프로그램">
+                        <option value="season">🎉 시즌 테마 행사</option>
+                        <option value="culture">🌍 원어민 행사</option>
+                        <option value="performance">👨‍👩‍👧‍👦 부모 참여 행사</option>
+                    </optgroup>
+                    <optgroup label="교재 프로그램">
+                        <option value="korean">📚 한글 교재</option>
+                        <option value="art">🎨 미술 교재</option>
+                        <option value="science">🔬 과학 교재</option>
+                        <option value="coding">💻 코딩 교재</option>
+                        <option value="english">🔤 영어 교재</option>
+                    </optgroup>
+                </select>
+                <label>제목</label>
+                <input type="text" id="post-title" placeholder="제목">
+                <label>사진 또는 유튜브 주소</label>
+                <input type="file" id="post-file" accept="image/*">
+                <input type="text" id="youtube-url" placeholder="또는 유튜브 링크 (https://youtu.be/...)" style="margin-top:5px;">
+                <p id="current-file-msg" style="font-size:0.8rem; color:#28a745; display:none; margin-top:5px;">✅ 현재 저장된 이미지가 있습니다.</p>
+                <label>내용</label>
+                <textarea id="post-content" placeholder="내용"></textarea>
+                <button id="btn-submit" onclick="savePost()" class="btn-action">업로드</button>
+                <button id="btn-cancel-edit" onclick="cancelEdit()" class="btn-action btn-cancel">수정 취소</button>
+                <button onclick="logout()" class="btn-action btn-logout">로그아웃</button>
+            </div>
+            <div class="panel-box">
+                <h2>🗑️ 전체 게시글 관리</h2>
+                <div id="manage-list"><p style="text-align:center; color:#999;">로딩 중...</p></div>
+            </div>
+        </div>
+    </div>
+    <footer></footer>
+    <script src="manager.js"></script>
+    <script>
+        let editingId = null; let originalImageUrl = null;
+        document.addEventListener("DOMContentLoaded", function () {
+            const checkSb = setInterval(() => { if (window.sb) { clearInterval(checkSb); checkSession(window.sb); } }, 100);
+        });
+
+        async function checkSession(sb) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('admin-section').style.display = 'block';
+                loadManageList(sb);
+            } else {
+                document.getElementById('login-section').style.display = 'block';
+                document.getElementById('admin-section').style.display = 'none';
+            }
+        }
+        async function adminLogin() {
+            const { error } = await window.sb.auth.signInWithPassword({
+                email: document.getElementById('admin-email').value,
+                password: document.getElementById('admin-password').value
+            });
+            if (error) alert("로그인 실패"); else location.reload();
+        }
+        async function logout() { await window.sb.auth.signOut(); location.reload(); }
+
+        async function savePost() {
+            const sb = window.sb;
+            const category = document.getElementById('post-category').value;
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+            const file = document.getElementById('post-file').files[0];
+            const youtube = document.getElementById('youtube-url').value;
+
+            if (!title || !content) return alert("제목과 내용은 필수입니다.");
+            document.getElementById('loading').style.display = 'block';
+
+            let finalUrl = originalImageUrl;
+            try {
+                if (file) {
+                    const fileName = `${category}_${Date.now()}_${file.name}`;
+                    await sb.storage.from('images').upload(fileName, file);
+                    const { data } = sb.storage.from('images').getPublicUrl(fileName);
+                    finalUrl = data.publicUrl;
+                } else if (youtube) { finalUrl = youtube; }
+                if (!editingId && !file && !youtube) finalUrl = null;
+
+                if (editingId) {
+                    await sb.from('total_posts').update({ category, title, content, image_url: finalUrl }).eq('id', editingId);
+                    alert("수정되었습니다!");
+                } else {
+                    await sb.from('total_posts').insert([{ category, title, content, image_url: finalUrl }]);
+                    alert("업로드 완료!");
+                }
+                cancelEdit(); loadManageList(sb);
+            } catch (e) { alert("오류: " + e.message); }
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        async function loadManageList(sb) {
+            const listDiv = document.getElementById('manage-list');
+            const { data, error } = await sb.from('total_posts').select('*').order('created_at', { ascending: false });
+            if (error || !data) { listDiv.innerHTML = "<p>데이터 로딩 실패</p>"; return; }
+            listDiv.innerHTML = "";
+
+            const badgeColors = {
+                'season': '#4cc9f0', 'culture': '#1a3c6e', 'performance': '#f4a261',
+                'korean': '#e76f51', 'art': '#f4a261', 'science': '#457b9d', 'coding': '#7209b7', 'english': '#1a3c6e'
+            };
+            const catNames = {
+                'season': '시즌', 'culture': '원어민', 'performance': '부모참여',
+                'korean': '한글', 'art': '미술', 'science': '과학', 'coding': '코딩', 'english': '영어'
+            };
+
+            data.forEach(item => {
+                const color = badgeColors[item.category] || '#999';
+                const catName = catNames[item.category] || item.category;
+                const itemStr = encodeURIComponent(JSON.stringify(item));
+                listDiv.innerHTML += `
+                        <div class="post-item">
+                            <div style="flex:1;">
+                                <span class="category-badge" style="background:${color}">${catName}</span>
+                                <b>${item.title}</b>
+                            </div>
+                            <div style="min-width:110px; text-align:right;">
+                                <button onclick="startEdit('${itemStr}')" class="btn-edit">수정</button>
+                                <button onclick="deletePost(${item.id})" class="btn-del">삭제</button>
+                            </div>
+                        </div>`;
+            });
+        }
+
+        function startEdit(itemStr) {
+            const item = JSON.parse(decodeURIComponent(itemStr));
+            editingId = item.id; originalImageUrl = item.image_url;
+            document.getElementById('post-category').value = item.category;
+            document.getElementById('post-title').value = item.title;
+            document.getElementById('post-content').value = item.content;
+            document.getElementById('youtube-url').value = ""; document.getElementById('post-file').value = "";
+            document.getElementById('form-title').innerText = "✏️ 수정 중...";
+            document.getElementById('btn-submit').innerText = "수정 완료";
+            document.getElementById('btn-cancel-edit').style.display = 'block';
+            if (item.image_url) document.getElementById('current-file-msg').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingId = null; originalImageUrl = null;
+            document.getElementById('post-title').value = ""; document.getElementById('post-content').value = "";
+            document.getElementById('post-file').value = ""; document.getElementById('youtube-url').value = "";
+            document.getElementById('current-file-msg').style.display = 'none';
+            document.getElementById('form-title').innerText = "📝 새 글 작성하기";
+            document.getElementById('btn-submit').innerText = "업로드";
+            document.getElementById('btn-cancel-edit').style.display = 'none';
+        }
+
+        async function deletePost(id) {
+            if (confirm("삭제하시겠습니까?")) {
+                await window.sb.from('total_posts').delete().eq('id', id);
+                if (editingId === id) cancelEdit();
+                loadManageList(window.sb);
+            }
+        }
+    </script>
+</body>
+</html>

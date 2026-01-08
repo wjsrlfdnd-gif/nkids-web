@@ -3,224 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <title>뉴키즈 - 시즌 테마 행사</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* 페이지 전용 스타일만 남김 (공통 요소는 manager.js에 있음) */
-
-        /* 서브 배너 배경 이미지 지정 */
+        /* [페이지별 배경 이미지 설정] */
         .sub-hero {
-            background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
+            background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1547638375-ebf04735d792?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
         }
 
-        /* 배지 스타일 */
-        .subject-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-        }
-
-        .bg-korean {
-            background-color: #e76f51;
-        }
-
-        .bg-math {
-            background-color: #2a9d8f;
-        }
-
-        .bg-art {
-            background-color: #f4a261;
-        }
-
-        .bg-science {
-            background-color: #457b9d;
-        }
-
-        /* 카드 그리드 */
-        .product-grid {
+        /* [게시판 스타일 공통] */
+        .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 30px;
         }
 
-        .product-card {
-            background: #fff;
+        .card {
+            background: white;
             border-radius: 15px;
             overflow: hidden;
-            border: 1px solid #eee;
+            cursor: pointer;
             transition: 0.3s;
+            border: 1px solid #eee;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
         }
 
-            .product-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            .card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.15);
                 border-color: var(--accent-color);
             }
 
-        .product-img {
+        .card-img-wrap {
             width: 100%;
-            height: 200px;
-            background-color: #ddd;
-            background-size: cover;
-            background-position: center;
+            height: 220px;
+            position: relative;
+            background: #f0f0f0;
+            overflow: hidden;
         }
 
-        .product-info {
-            padding: 30px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .product-title {
-            font-size: 1.4rem;
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: rgba(255,255,255,0.9);
+            display: none;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
             font-weight: bold;
-            margin-bottom: 10px;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
             color: #333;
         }
 
-        .product-desc {
-            color: #666;
+        .card-text {
             font-size: 0.95rem;
-            margin-bottom: 15px;
-            line-height: 1.5;
-            flex: 1;
+            color: #666;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        .product-features {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: #555;
-            list-style: none;
+        /* 팝업 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-            .product-features li::before {
-                content: "✔";
-                color: var(--accent-color);
-                margin-right: 5px;
-            }
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            border-radius: 15px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .modal-media-area {
+            width: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+
+        .modal-img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            display: none;
+        }
+
+        .modal-video {
+            width: 100%;
+            height: 400px;
+            display: none;
+        }
+
+        .modal-body-text {
+            padding: 30px;
+        }
     </style>
 </head>
 <body>
-
     <header></header>
 
     <section class="sub-hero">
         <div class="container">
-            <h1>시즌 테마 행사</h1>
-            <p>매달 새롭게 펼쳐지는 즐거운 체험 세상<br>아이들의 상상력이 현실이 됩니다.</p>
+            <h1>시즌 테마 행사</h1> <p>매달 새롭게 펼쳐지는 즐거운 체험 세상</p>
         </div>
     </section>
 
     <section style="background-color: var(--bg-light);">
         <div class="container">
-            <h2>뉴키즈 베스트 테마</h2>
-            <p class="section-desc">계절과 교육 목표에 딱 맞는 인기 프로그램을 만나보세요.</p>
-
-            <div class="event-grid">
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1547638375-ebf04735d792?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-winter">겨울 시즌</span>
-                        <h3 class="event-title">🎣 꽁꽁! 빙어축제</h3>
-                        <p class="event-desc">추운 겨울, 실내에서 즐기는 신나는 얼음 낚시! 얼음 구멍 속 빙어를 잡고 캠핑 놀이를 하며 겨울 정취를 만끽합니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1594754593457-375531d04138?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-safe">안전 교육</span>
-                        <h3 class="event-title">🔥 삐뽀삐뽀! 산불을 조심해</h3>
-                        <p class="event-desc">꼬마 소방관으로 변신! 화재 진압 체험과 구조 활동을 통해 산불의 위험성을 배우고 안전 의식을 기릅니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-job">역할 놀이</span>
-                        <h3 class="event-title">👨‍👩‍👧‍👦 가족의 탄생</h3>
-                        <p class="event-desc">사랑스러운 결혼식과 아기 돌보기 체험. 엄마 아빠가 되어보며 가족의 소중함과 사랑을 느껴보는 따뜻한 시간입니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1506509653835-f485743a6d2f?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-nature">자연 체험</span>
-                        <h3 class="event-title">🐷 할아버지 동물농장</h3>
-                        <p class="event-desc">교실 숲속으로 떠나는 소풍! 귀여운 동물 친구들을 만나고 먹이를 주며 생명 존중의 마음을 배웁니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1582967788606-a171f1080ca8?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-winter">여름 시즌</span>
-                        <h3 class="event-title">🐠 풍덩! 바닷 속으로</h3>
-                        <p class="event-desc">형형색색 산호초와 물고기 친구들! 잠수함 탐험과 해양 생물 체험으로 신비로운 바다 세상을 경험합니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1597587784013-33e3b3a0429f?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-job">직업 체험</span>
-                        <h3 class="event-title">🚗 붕붕카 자동차 정비소</h3>
-                        <p class="event-desc">뚝딱뚝딱! 멋진 정비사가 되어 자동차를 수리하고 세차해요. 교통 안전 규칙도 자연스럽게 익힙니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1540206395-688085723adb?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-history">지역 문화</span>
-                        <h3 class="event-title">🍊 제주 해녀의 하루</h3>
-                        <p class="event-desc">혼저옵서예~ 제주도 돌담길을 걷고 꼬마 해녀가 되어 물질을 해봐요. 우리 문화의 다양성을 체험합니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-space">과학 탐험</span>
-                        <h3 class="event-title">🚀 우주 어드벤쳐</h3>
-                        <p class="event-desc">3, 2, 1 발사! 우주비행사가 되어 행성을 탐험하고 무중력 체험을 하며 광활한 우주의 꿈을 키웁니다.</p>
-                    </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1549646452-9b2f6b867c4c?auto=format&fit=crop&w=500&q=60');"></div>
-                    <div class="event-info">
-                        <span class="event-tag bg-history">역사 체험</span>
-                        <h3 class="event-title">📜 조선의 인재</h3>
-                        <p class="event-desc">과거로 시간 여행! 선비가 되어 과거 시험을 보고 전통 예절과 문화를 익히는 뜻깊은 역사 체험입니다.</p>
-                    </div>
-                </div>
-
+            <h2 style="text-align: left; margin-bottom: 30px;">📸 활동 갤러리</h2>
+            <div id="post-list" class="gallery-grid">
+                <div style="text-align:center; width:100%; grid-column: 1/-1; padding:50px;">로딩 중...</div>
             </div>
         </div>
     </section>
 
-    <section style="text-align: center; background-color: var(--primary-color); color: #fff;">
-        <div class="container">
-            <h2 style="color: #fff;">더 많은 테마가 준비되어 있습니다!</h2>
-            <p style="margin-bottom: 20px;">월별 계획표와 상세 견적이 필요하신가요?</p>
-            <a href="proposal.html" class="btn" style="background: #fff; color: var(--primary-color);">📞 행사 문의 및 견적 요청</a>
+    <div id="post-modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal(event)">×</button>
+            <div class="modal-media-area">
+                <img id="modal-img" class="modal-img" src="">
+                <iframe id="modal-video" class="modal-video" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+            <div class="modal-body-text">
+                <h3 id="modal-title" style="margin-bottom:15px; color:#1a3c6e;"></h3>
+                <div id="modal-text" style="white-space:pre-wrap; color:#444;"></div>
+            </div>
         </div>
-    </section>
+    </div>
 
     <footer></footer>
-
     <script src="manager.js"></script>
+    <script>
+        // ★★★ 여기만 페이지별로 바꿔주세요! ★★★
+        const CATEGORY_NAME = 'season';  // 'season' 또는 'performance' 또는 'culture'
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const checkSb = setInterval(() => { if (window.sb) { clearInterval(checkSb); loadPosts(window.sb); } }, 100);
+        });
+
+        function getYoutubeId(url) {
+            if (!url) return null;
+            const match = url.match(/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/);
+            return (match && match[7].length === 11) ? match[7] : null;
+        }
+
+        async function loadPosts(sb) {
+            // 해당 카테고리 글만 가져오기 (.eq 사용)
+            const { data } = await sb.from('total_posts')
+                .select('*')
+                .eq('category', CATEGORY_NAME)
+                .order('created_at', { ascending: false });
+
+            const list = document.getElementById('post-list');
+            list.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                list.innerHTML = `<div style="text-align:center; grid-column:1/-1; padding:50px;">등록된 게시글이 없습니다.</div>`;
+                return;
+            }
+
+            data.forEach(item => {
+                let imgUrl = item.image_url;
+                let isVideo = false;
+                const yId = getYoutubeId(imgUrl);
+
+                if (yId) { imgUrl = `https://img.youtube.com/vi/${yId}/hqdefault.jpg`; isVideo = true; }
+                else if (!imgUrl) { imgUrl = 'https://via.placeholder.com/400x300?text=No+Image'; }
+
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.onclick = () => openModal(item);
+                div.innerHTML = `
+                        <div class="card-img-wrap">
+                            <img src="${imgUrl}" class="card-img">
+                            <div class="play-icon" style="display:${isVideo ? 'block' : 'none'}">▶</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${item.title}</div>
+                            <div class="card-text">${item.content}</div>
+                        </div>`;
+                list.appendChild(div);
+            });
+        }
+
+        function openModal(item) {
+            document.getElementById('modal-title').innerText = item.title;
+            document.getElementById('modal-text').innerText = item.content;
+            const imgEl = document.getElementById('modal-img');
+            const vidEl = document.getElementById('modal-video');
+            const yId = getYoutubeId(item.image_url);
+
+            if (yId) {
+                imgEl.style.display = 'none'; vidEl.style.display = 'block';
+                vidEl.src = `https://www.youtube.com/embed/${yId}?autoplay=1`;
+            } else if (item.image_url) {
+                vidEl.style.display = 'none'; vidEl.src = ""; imgEl.style.display = 'block';
+                imgEl.src = item.image_url;
+            } else {
+                vidEl.style.display = 'none'; imgEl.style.display = 'none';
+            }
+            document.getElementById('post-modal').style.display = 'flex';
+        }
+
+        function closeModal(e) {
+            if (e.target === e.currentTarget || e.target.classList.contains('close-btn')) {
+                document.getElementById('post-modal').style.display = 'none';
+                document.getElementById('modal-video').src = "";
+            }
+        }
+    </script>
 </body>
 </html>

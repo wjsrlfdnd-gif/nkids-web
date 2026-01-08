@@ -6,235 +6,290 @@
     <title>뉴키즈 - 맞춤 제안서 신청</title>
     <style>
         /* [기본 스타일] */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Pretendard', sans-serif; color: #333; line-height: 1.6; background: #fff; }
-        a { text-decoration: none; color: inherit; }
-        
-        :root { --primary-color: #1a3c6e; --accent-color: #f4a261; --bg-light: #f8f9fa; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-        section { padding: 80px 0; }
-        h2 { font-size: 2.2rem; text-align: center; margin-bottom: 40px; color: var(--primary-color); font-weight: 700; }
-        
-        .btn { display: inline-block; padding: 12px 30px; background-color: var(--accent-color); color: #fff; border-radius: 5px; font-weight: bold; transition: 0.3s; border: none; cursor: pointer; font-size: 1rem; }
-        .btn:hover { background-color: #e76f51; }
-
-        /* [헤더] */
-        header { width: 100%; height: 70px; background-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: fixed; top: 0; z-index: 1000; }
-        .header-inner { display: flex; justify-content: space-between; align-items: center; height: 100%; }
-        .logo { font-size: 1.5rem; font-weight: 900; color: var(--primary-color); }
-        .nav-menu { display: flex; gap: 30px; }
-        .nav-menu li a:hover { color: var(--accent-color); }
-
-        /* [서브 배너 (가독성 강화)] */
-        .sub-hero {
-            height: 350px;
-            /* 파티/풍선 이미지 + 어두운 필터 */
-            background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
-            background-size: cover;
-            display: flex; align-items: center; justify-content: center; text-align: center; color: #fff; margin-top: 70px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .sub-hero h1 { font-size: 3.2rem; font-weight: 800; margin-bottom: 20px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: -1px; }
-        .sub-hero p { font-size: 1.4rem; font-weight: 600; color: #ffdca8; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
 
+        body {
+            font-family: 'Pretendard', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: #fff;
+        }
 
-        /* [입력 폼 스타일] */
-        .form-wrapper { background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border: 1px solid #eee; max-width: 800px; margin: 0 auto; }
-        .form-group { margin-bottom: 25px; }
-        .form-label { display: block; font-weight: bold; margin-bottom: 10px; color: #1a3c6e; font-size: 1.05rem; }
-        .form-label span { color: #e76f51; } 
-        .form-input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; transition: 0.3s; font-family: inherit; }
-        .form-input:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(26, 60, 110, 0.1); }
-        .form-textarea { height: 120px; resize: vertical; }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        :root {
+            --primary-color: #1a3c6e;
+            --accent-color: #f4a261;
+            --bg-light: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        /* 헤더 스타일 (manager.js와 연동) */
+        header {
+            width: 100%;
+            height: 70px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* 서브 배너 */
+        .sub-hero {
+            height: 300px;
+            background: linear-gradient(rgba(26,60,110,0.8), rgba(26,60,110,0.8)), url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+            margin-top: 70px;
+        }
+
+            .sub-hero h1 {
+                font-size: 2.5rem;
+                font-weight: 800;
+                margin-bottom: 15px;
+            }
+
+            .sub-hero p {
+                font-size: 1.2rem;
+                color: #ffdca8;
+            }
+
+        /* 폼 스타일 */
+        .form-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1a3c6e;
+            font-size: 1.1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+
+            .form-input:focus {
+                border-color: var(--primary-color);
+                outline: none;
+            }
 
         /* 체크박스 그룹 */
-        .checkbox-category { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 15px; }
-        .category-title { font-size: 0.95rem; font-weight: bold; margin-bottom: 10px; color: #555; display: block; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-        
-        .checkbox-group { display: flex; gap: 10px; flex-wrap: wrap; }
-        .checkbox-label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; background: #fff; padding: 8px 12px; border: 1px solid #ddd; border-radius: 20px; transition: 0.2s; }
-        .checkbox-label:hover { border-color: var(--primary-color); background-color: #e3f2fd; }
-        .checkbox-input { width: 16px; height: 16px; accent-color: var(--primary-color); }
-        
-        .sub-group-title { width: 100%; font-size: 0.85rem; color: #888; margin: 10px 0 5px; font-weight: 600; }
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 10px;
+        }
 
-        .privacy-box { background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 0.85rem; color: #666; margin-bottom: 15px; height: 100px; overflow-y: auto; border: 1px solid #eee; }
-        
-        @media (max-width: 768px) { .form-wrapper { padding: 20px; } .checkbox-label { width: 100%; } }
-        footer { background: #222; color: #888; padding: 40px 0; text-align: center; font-size: 0.9rem; }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+            .checkbox-item input {
+                margin-right: 10px;
+                transform: scale(1.2);
+                accent-color: var(--primary-color);
+            }
+
+        .group-title {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        /* 버튼 */
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 30px;
+        }
+
+            .btn-submit:hover {
+                background-color: #0f2546;
+            }
+
+            .btn-submit:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+
+        footer {
+            background: #222;
+            color: #888;
+            padding: 40px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-
-    <header></header>
-
-    <section class="sub-hero">
-        <div style="padding:0 20px;">
-            <h1>맞춤 제안서 신청</h1>
-            <p>우리 원에 딱 맞는 교재와 행사, 뉴키즈가 제안해 드립니다.</p>
+    <header></header> <section class="sub-hero">
+        <div class="container">
+            <h1>견적 및 샘플 신청</h1>
+            <p>우리 원에 딱 맞는 교육 프로그램, 뉴키즈가 제안해 드립니다.</p>
         </div>
     </section>
 
-    <section style="background-color: var(--bg-light);">
+    <section style="background-color: #f8f9fa;">
         <div class="container">
-            <div class="form-wrapper">
-                <h3 style="text-align: center; margin-bottom: 30px; font-size: 1.5rem; color:#333;">상담 신청서 작성</h3>
-                
-                <form onsubmit="submitForm(event)">
-                    
+            <div class="form-box">
+                <form id="proposalForm">
                     <div class="form-group">
-                        <label class="form-label">원명 (어린이집/유치원 이름) <span>*</span></label>
-                        <input type="text" name="wonName" class="form-input" placeholder="예) 해맑은 어린이집" required>
+                        <label class="form-label">원명 (어린이집/유치원)</label>
+                        <input type="text" name="wonName" class="form-input" placeholder="예) 해피어린이집" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">담당자 성함 / 직함</label>
+                        <input type="text" name="manager" class="form-input" placeholder="예) 김뉴키 원장" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">연락처 (휴대전화)</label>
+                        <input type="tel" name="phone" class="form-input" placeholder="010-0000-0000 (상담용)" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">지역 (시/구)</label>
+                        <input type="text" name="area" class="form-input" placeholder="예) 김포시 구래동">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">담당자 성함 / 직함 <span>*</span></label>
-                        <input type="text" name="manager" class="form-input" placeholder="예) 김뉴키 원장님" required>
-                    </div>
+                        <label class="form-label">관심 프로그램 (중복 선택 가능)</label>
 
-                    <div class="form-group">
-                        <label class="form-label">연락처 <span>*</span></label>
-                        <input type="tel" name="phone" class="form-input" placeholder="010-0000-0000" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">이메일 (견적서 받으실 곳) <span>*</span></label>
-                        <input type="email" name="email" class="form-input" placeholder="example@naver.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">지역 (동/읍/면)</label>
-                        <input type="text" name="area" class="form-input" placeholder="예) 김포시 장기동">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">관심 분야 (중복 선택 가능)</label>
-                        
-                        <div class="checkbox-category">
-                            <span class="category-title">👶 영아반 (Standard)</span>
-                            <div class="checkbox-group">
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="영아-한글" class="checkbox-input"> 한글</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="영아-수학" class="checkbox-input"> 수학</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="영아-미술" class="checkbox-input"> 미술</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="영아-과학" class="checkbox-input"> 과학</label>
-                            </div>
+                        <div class="group-title">📚 교재 프로그램</div>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" name="interests" value="한글/누리과정"> 한글/누리과정</label>
+                            <label class="checkbox-item"><input type="checkbox" name="interests" value="미술교재"> 창의 미술</label>
+                            <label class="checkbox-item"><input type="checkbox" name="interests" value="과학/수학"> 과학/수학</label>
+                            <label class="checkbox-item"><input type="checkbox" name="interests" value="코딩교재"> 미래형 코딩</label>
+                            <label class="checkbox-item"><input type="checkbox" name="interests" value="영어교재"> 글로벌 영어</label>
                         </div>
 
-                        <div class="checkbox-category">
-                            <span class="category-title">🧒 유아반 (Premium)</span>
-                            <div class="checkbox-group">
-                                <div class="sub-group-title">- 누리과정 & 영어</div>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="마음빛깔" class="checkbox-input"> 마음빛깔(인성)</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="세힘" class="checkbox-input"> 세힘(누리)</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="레디셋/스토릭스" class="checkbox-input"> 레디셋/스토릭스</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="STTW" class="checkbox-input"> STTW(통합영어)</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="윙스" class="checkbox-input"> 윙스(패드영어)</label>
-                                
-                                <div class="sub-group-title">- 창의 특성화</div>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="비누코딩" class="checkbox-input"> 비누코딩</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="책보플러스/부엉이" class="checkbox-input"> 책보/부엉이(독서)</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="두잉/안다과학" class="checkbox-input"> 두잉/안다과학</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="펀아트/메이커아트" class="checkbox-input"> 펀아트/메이커아트</label>
-                            </div>
-                        </div>
-
-                        <div class="checkbox-category">
-                            <span class="category-title">🎉 행사 및 이벤트</span>
-                            <div class="checkbox-group">
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="시즌행사" class="checkbox-input"> 시즌 테마 행사</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="영어행사" class="checkbox-input"> 원어민 문화 체험</label>
-                                <label class="checkbox-label"><input type="checkbox" name="interests" value="퍼포먼스" class="checkbox-input"> 오감 퍼포먼스</label>
-                            </div>
+                        <div class="group-title">🎉 행사 프로그램</div>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" name="interests" value="시즌행사"> 시즌 테마 행사</label>
+                            <label class="checkbox-item"><input type="checkbox" name="interests" value="원어민행사"> 원어민 행사</label>
+                            <label class="checkbox-item"><input type="checkbox" name="interests" value="부모참여"> 부모 참여 행사</label>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">방문 상담 희망 날짜</label>
+                        <label class="form-label">📅 방문 및 전화 상담 희망 날짜</label>
                         <input type="date" name="visitDate" class="form-input">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">기타 문의 내용</label>
-                        <textarea name="inquiry" class="form-input form-textarea" placeholder="궁금하신 점을 적어주세요."></textarea>
+                        <label class="form-label">문의사항 (시간대 등)</label>
+                        <textarea name="inquiry" class="form-input" style="height: 120px; resize: vertical;" placeholder="원하시는 시간대나 궁금하신 점을 자유롭게 적어주세요."></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">개인정보 동의 <span>*</span></label>
-                        <div class="privacy-box">
-                            1. 수집 항목: 이름, 연락처 등 / 2. 목적: 상담 / 3. 보유기간: 상담 종료 시
-                        </div>
-                        <label class="checkbox-label" style="display:inline-flex; border:none; background:none; padding:0;">
-                            <input type="checkbox" class="checkbox-input" required> 
-                            <span style="margin-left:5px;">동의합니다.</span>
-                        </label>
-                    </div>
-
-                    <div style="text-align: center; margin-top: 40px;">
-                        <button type="submit" class="btn" style="width: 100%; max-width: 300px; font-size: 1.2rem; padding: 15px;">신청하기</button>
-                    </div>
+                    <button type="submit" class="btn-submit">견적 및 상담 신청하기</button>
                 </form>
-            </div>
-            
-            <div style="text-align: center; margin-top: 40px; color: #666;">
-                <p>전화로도 바로 상담 가능합니다.</p>
-                <p style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color); margin-top: 10px;">
-                    <span id="info_phone">010-2333-2563</span>
-                </p>
             </div>
         </div>
     </section>
 
     <footer></footer>
     <script src="manager.js"></script>
-
     <script>
-        // ★중요★ 사장님의 구글 앱스 스크립트 주소(URL)를 아래 따옴표 안에 넣으세요!
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz68tFmFB7IuCEhLIgnm4RMuqiYlXzdgqDVikGFOODFVuh9wXfdOL4aZ4VFy-7HAsVPjQ/exec";
+        const GOOGLE_SCRIPT_URL = SHEET_URL;
 
-        function submitForm(e) {
-            e.preventDefault(); 
-            const form = e.target;
-            const btn = form.querySelector('button');
-            
+        const form = document.getElementById('proposalForm');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const btn = form.querySelector('.btn-submit');
+            const originalText = btn.innerText;
             btn.disabled = true;
-            btn.innerText = "전송 중...";
+            btn.innerText = "전송 중입니다...";
 
             const formData = new FormData(form);
-            
-            // 체크박스 값들을 하나로 묶기
+
             let interestsArray = [];
             form.querySelectorAll('input[name="interests"]:checked').forEach(chk => {
                 interestsArray.push(chk.value);
             });
 
-            // 전송 데이터 구성
             const data = {
                 wonName: formData.get("wonName"),
                 manager: formData.get("manager"),
                 phone: formData.get("phone"),
-                email: formData.get("email"),
                 area: formData.get("area"),
                 interests: interestsArray.join(", "),
+                // [추가] 날짜 데이터 전송
                 visitDate: formData.get("visitDate"),
-                inquiry: formData.get("inquiry")
+                inquiry: formData.get("inquiry"),
+                timestamp: new Date().toLocaleString()
             };
 
-            // 구글 엑셀 서버로 전송
-            fetch(SCRIPT_URL, {
+            fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 body: JSON.stringify(data)
             })
-            .then(response => {
-                alert("신청이 완료되었습니다! 담당자가 확인 후 연락드리겠습니다.");
-                window.location.href = 'index.html'; // 홈으로 이동
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("오류가 발생했습니다. 다시 시도해 주세요.");
-                btn.disabled = false;
-                btn.innerText = "신청하기";
-            });
-        }
+                .then(response => {
+                    alert("신청이 완료되었습니다! 담당자가 확인 후 빠르게 연락드리겠습니다.");
+                    window.location.href = 'index.html';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                });
+        });
     </script>
-<script src="manager.js"></script>
 </body>
 </html>
