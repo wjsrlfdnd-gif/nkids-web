@@ -200,6 +200,12 @@
                         <label class="form-label">연락처 (휴대전화)</label>
                         <input type="tel" name="phone" class="form-input" placeholder="010-0000-0000 (상담용)" required>
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label">이메일 (제안서 받으실 곳)</label>
+                        <input type="email" name="email" class="form-input" placeholder="example@naver.com">
+                    </div>
+
                     <div class="form-group">
                         <label class="form-label">지역 (시/구)</label>
                         <input type="text" name="area" class="form-input" placeholder="예) 김포시 구래동">
@@ -267,9 +273,10 @@
                 wonName: formData.get("wonName"),
                 manager: formData.get("manager"),
                 phone: formData.get("phone"),
+                // [추가] 이메일 전송
+                email: formData.get("email"),
                 area: formData.get("area"),
                 interests: interestsArray.join(", "),
-                // [추가] 날짜 데이터 전송
                 visitDate: formData.get("visitDate"),
                 inquiry: formData.get("inquiry"),
                 timestamp: new Date().toLocaleString()
