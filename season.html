@@ -5,12 +5,10 @@
     <title>뉴키즈 - 시즌 테마 행사</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* [페이지별 배경 이미지 설정] */
         .sub-hero {
             background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1547638375-ebf04735d792?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
         }
 
-        /* [게시판 스타일 공통] */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -142,6 +140,23 @@
         .modal-body-text {
             padding: 30px;
         }
+
+        /* 버튼 스타일 추가 */
+        .btn-cta {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #fff;
+            color: #1a3c6e;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+            .btn-cta:hover {
+                background-color: #f4a261;
+                color: #fff;
+            }
     </style>
 </head>
 <body>
@@ -149,7 +164,8 @@
 
     <section class="sub-hero">
         <div class="container">
-            <h1>시즌 테마 행사</h1> <p>매달 새롭게 펼쳐지는 즐거운 체험 세상</p>
+            <h1>시즌 테마 행사</h1>
+            <p>매달 새롭게 펼쳐지는 즐거운 체험 세상</p>
         </div>
     </section>
 
@@ -159,6 +175,14 @@
             <div id="post-list" class="gallery-grid">
                 <div style="text-align:center; width:100%; grid-column: 1/-1; padding:50px;">로딩 중...</div>
             </div>
+        </div>
+    </section>
+
+    <section style="text-align: center; background-color: var(--primary-color); color: #fff;">
+        <div class="container">
+            <h2 style="color: #fff;">우리 원에 딱 맞는 시즌 행사를 찾으시나요?</h2>
+            <p style="margin-bottom: 20px;">원하는 날짜와 인원을 알려주시면 맞춤 견적서를 보내드립니다.</p>
+            <a href="proposal.html" class="btn-cta">📋 견적 및 상담 신청</a>
         </div>
     </section>
 
@@ -179,8 +203,7 @@
     <footer></footer>
     <script src="manager.js"></script>
     <script>
-        // ★★★ 여기만 페이지별로 바꿔주세요! ★★★
-        const CATEGORY_NAME = 'season';  // 'season' 또는 'performance' 또는 'culture'
+        const CATEGORY_NAME = 'season';
 
         document.addEventListener("DOMContentLoaded", function () {
             const checkSb = setInterval(() => { if (window.sb) { clearInterval(checkSb); loadPosts(window.sb); } }, 100);
@@ -193,7 +216,6 @@
         }
 
         async function loadPosts(sb) {
-            // 해당 카테고리 글만 가져오기 (.eq 사용)
             const { data } = await sb.from('total_posts')
                 .select('*')
                 .eq('category', CATEGORY_NAME)

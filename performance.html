@@ -74,6 +74,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
         /* 팝업 스타일 */
         .modal-overlay {
             display: none;
@@ -139,21 +140,52 @@
         .modal-body-text {
             padding: 30px;
         }
+
+        /* 버튼 스타일 */
+        .btn-cta {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #fff;
+            color: #1a3c6e;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+            .btn-cta:hover {
+                background-color: #f4a261;
+                color: #fff;
+            }
     </style>
 </head>
 <body>
     <header></header>
+
     <section class="sub-hero">
         <div class="container">
-            <h1>부모 참여 행사</h1> <p>아이들의 잠재된 창의력과 감성을 깨워주는 특별한 시간</p>
+            <h1>부모 참여 행사</h1>
+            <p>아이들의 잠재된 창의력과 감성을 깨워주는 특별한 시간</p>
         </div>
     </section>
+
     <section style="background-color: var(--bg-light);">
         <div class="container">
             <h2 style="text-align: left; margin-bottom: 30px;">📸 활동 갤러리</h2>
-            <div id="post-list" class="gallery-grid"><div style="text-align:center; width:100%; grid-column: 1/-1; padding:50px;">로딩 중...</div></div>
+            <div id="post-list" class="gallery-grid">
+                <div style="text-align:center; width:100%; grid-column: 1/-1; padding:50px;">로딩 중...</div>
+            </div>
         </div>
     </section>
+
+    <section style="text-align: center; background-color: var(--primary-color); color: #fff;">
+        <div class="container">
+            <h2 style="color: #fff;">부모님도 아이들도 만족하는 참여 수업!</h2>
+            <p style="margin-bottom: 20px;">원장님께 딱 맞는 행사 프로그램을 제안해 드립니다.</p>
+            <a href="proposal.html" class="btn-cta">📋 견적 및 상담 신청</a>
+        </div>
+    </section>
+
     <div id="post-modal" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal(event)">×</button>
@@ -167,35 +199,85 @@
             </div>
         </div>
     </div>
+
     <footer></footer>
     <script src="manager.js"></script>
     <script>
         const CATEGORY_NAME = 'performance';
+
         document.addEventListener("DOMContentLoaded", function () {
             const checkSb = setInterval(() => { if (window.sb) { clearInterval(checkSb); loadPosts(window.sb); } }, 100);
         });
-        function getYoutubeId(url) { if (!url) return null; const match = url.match(/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/); return (match && match[7].length === 11) ? match[7] : null; }
+
+        function getYoutubeId(url) {
+            if (!url) return null;
+            const match = url.match(/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/);
+            return (match && match[7].length === 11) ? match[7] : null;
+        }
+
         async function loadPosts(sb) {
-            const { data } = await sb.from('total_posts').select('*').eq('category', CATEGORY_NAME).order('created_at', { ascending: false });
-            const list = document.getElementById('post-list'); list.innerHTML = "";
-            if (!data || data.length === 0) { list.innerHTML = `<div style="text-align:center; grid-column:1/-1; padding:50px;">등록된 게시글이 없습니다.</div>`; return; }
+            const { data } = await sb.from('total_posts')
+                .select('*')
+                .eq('category', CATEGORY_NAME)
+                .order('created_at', { ascending: false });
+
+            const list = document.getElementById('post-list');
+            list.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                list.innerHTML = `<div style="text-align:center; grid-column:1/-1; padding:50px;">등록된 게시글이 없습니다.</div>`;
+                return;
+            }
+
             data.forEach(item => {
-                let imgUrl = item.image_url, isVideo = false, yId = getYoutubeId(imgUrl);
-                if (yId) { imgUrl = `https://img.youtube.com/vi/${yId}/hqdefault.jpg`; isVideo = true; } else if (!imgUrl) { imgUrl = 'https://via.placeholder.com/400x300?text=No+Image'; }
-                const div = document.createElement('div'); div.className = 'card'; div.onclick = () => openModal(item);
-                div.innerHTML = `<div class="card-img-wrap"><img src="${imgUrl}" class="card-img"><div class="play-icon" style="display:${isVideo ? 'block' : 'none'}">▶</div></div><div class="card-body"><div class="card-title">${item.title}</div><div class="card-text">${item.content}</div></div>`;
+                let imgUrl = item.image_url;
+                let isVideo = false;
+                const yId = getYoutubeId(imgUrl);
+
+                if (yId) { imgUrl = `https://img.youtube.com/vi/${yId}/hqdefault.jpg`; isVideo = true; }
+                else if (!imgUrl) { imgUrl = 'https://via.placeholder.com/400x300?text=No+Image'; }
+
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.onclick = () => openModal(item);
+                div.innerHTML = `
+                        <div class="card-img-wrap">
+                            <img src="${imgUrl}" class="card-img">
+                            <div class="play-icon" style="display:${isVideo ? 'block' : 'none'}">▶</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${item.title}</div>
+                            <div class="card-text">${item.content}</div>
+                        </div>`;
                 list.appendChild(div);
             });
         }
+
         function openModal(item) {
-            document.getElementById('modal-title').innerText = item.title; document.getElementById('modal-text').innerText = item.content;
-            const imgEl = document.getElementById('modal-img'), vidEl = document.getElementById('modal-video'), yId = getYoutubeId(item.image_url);
-            if (yId) { imgEl.style.display = 'none'; vidEl.style.display = 'block'; vidEl.src = `https://www.youtube.com/embed/${yId}?autoplay=1`; }
-            else if (item.image_url) { vidEl.style.display = 'none'; vidEl.src = ""; imgEl.style.display = 'block'; imgEl.src = item.image_url; }
-            else { vidEl.style.display = 'none'; imgEl.style.display = 'none'; }
+            document.getElementById('modal-title').innerText = item.title;
+            document.getElementById('modal-text').innerText = item.content;
+            const imgEl = document.getElementById('modal-img');
+            const vidEl = document.getElementById('modal-video');
+            const yId = getYoutubeId(item.image_url);
+
+            if (yId) {
+                imgEl.style.display = 'none'; vidEl.style.display = 'block';
+                vidEl.src = `https://www.youtube.com/embed/${yId}?autoplay=1`;
+            } else if (item.image_url) {
+                vidEl.style.display = 'none'; vidEl.src = ""; imgEl.style.display = 'block';
+                imgEl.src = item.image_url;
+            } else {
+                vidEl.style.display = 'none'; imgEl.style.display = 'none';
+            }
             document.getElementById('post-modal').style.display = 'flex';
         }
-        function closeModal(e) { if (e.target === e.currentTarget || e.target.classList.contains('close-btn')) { document.getElementById('post-modal').style.display = 'none'; document.getElementById('modal-video').src = ""; } }
+
+        function closeModal(e) {
+            if (e.target === e.currentTarget || e.target.classList.contains('close-btn')) {
+                document.getElementById('post-modal').style.display = 'none';
+                document.getElementById('modal-video').src = "";
+            }
+        }
     </script>
 </body>
 </html>
