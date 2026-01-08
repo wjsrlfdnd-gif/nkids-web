@@ -5,7 +5,7 @@
     <title>뉴키즈 - 문화체험 관리자 페이지</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* [관리자 페이지 전용 스타일] */
+        /* 기본 스타일은 유지하고 유튜브 입력칸 스타일 추가 */
         body {
             font-family: 'Pretendard', sans-serif;
             background: #f4f6f8;
@@ -17,9 +17,7 @@
             margin: 0 auto;
             padding: 40px 20px 80px;
         }
-        /* 상단 여백 조정 */
 
-        /* 로그인 박스 */
         #login-section {
             max-width: 400px;
             margin: 80px auto;
@@ -38,7 +36,6 @@
                 border-radius: 5px;
             }
 
-        /* 관리자 패널 */
         #admin-section {
             display: none;
         }
@@ -79,7 +76,6 @@
             resize: vertical;
         }
 
-        /* 버튼 */
         .btn-action {
             display: block;
             width: 100%;
@@ -114,27 +110,12 @@
             font-size: 0.85rem;
         }
 
-        /* 목록 스타일 */
         .post-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px;
             border-bottom: 1px solid #eee;
-        }
-
-        .post-info {
-            font-size: 0.95rem;
-        }
-
-        .post-title {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .post-date {
-            font-size: 0.8rem;
-            color: #888;
         }
 
         .loading-overlay {
@@ -152,10 +133,18 @@
             color: #1a3c6e;
             font-size: 1.5rem;
         }
+
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            color: #999;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
-    <header></header> <div id="loading" class="loading-overlay">잠시만 기다려주세요...</div>
+    <header></header>
+    <div id="loading" class="loading-overlay">업로드 중입니다...</div>
 
     <div class="container">
         <div id="login-section">
@@ -171,9 +160,14 @@
                 <label>제목</label>
                 <input type="text" id="post-title" placeholder="제목을 입력하세요">
 
-                <label>사진 첨부 (선택)</label>
+                <label>1. 사진 첨부 (이미지 파일)</label>
                 <input type="file" id="post-file" accept="image/*">
-                <p style="font-size:0.8rem; color:#888; margin-top:5px;">* 사진을 선택하면 자동으로 서버에 저장됩니다.</p>
+
+                <div class="divider">- 또는 -</div>
+
+                <label>2. 유튜브 동영상 (링크 주소)</label>
+                <input type="text" id="youtube-url" placeholder="예) https://youtu.be/...">
+                <p style="font-size:0.8rem; color:#888; margin-top:5px;">* 사진을 첨부하면 유튜브 링크는 무시됩니다.</p>
 
                 <label>내용</label>
                 <textarea id="post-content" placeholder="내용을 입력하세요"></textarea>
@@ -183,10 +177,8 @@
             </div>
 
             <div class="panel-box">
-                <h2>🗑️ 게시글 관리 (삭제)</h2>
-                <div id="manage-list">
-                    <p style="text-align:center; color:#999;">로딩 중...</p>
-                </div>
+                <h2>🗑️ 게시글 관리</h2>
+                <div id="manage-list">로딩 중...</div>
             </div>
         </div>
     </div>
@@ -195,17 +187,15 @@
     <script src="manager.js"></script>
 
     <script>
-        // manager.js 로딩 대기 후 Supabase 연결 확인
         document.addEventListener("DOMContentLoaded", function () {
             const checkSb = setInterval(() => {
                 if (window.sb) {
                     clearInterval(checkSb);
-                    checkSession(window.sb); // 로그인 체크 시작
+                    checkSession(window.sb);
                 }
-            }, 100); // 0.1초마다 체크
+            }, 100);
         });
 
-        // [로그인 상태 체크]
         async function checkSession(sb) {
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
@@ -218,55 +208,53 @@
             }
         }
 
-        // [로그인]
         async function adminLogin() {
             const sb = window.sb;
             const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
             const { error } = await sb.auth.signInWithPassword({ email, password });
-
-            if (error) alert("로그인 실패: 이메일이나 비밀번호를 확인하세요.");
+            if (error) alert("로그인 실패: 정보를 확인해주세요.");
             else location.reload();
         }
 
-        // [로그아웃]
         async function logout() {
             await window.sb.auth.signOut();
             location.reload();
         }
 
-        // [글 저장 (이미지 업로드 포함)]
         async function savePost() {
             const sb = window.sb;
             const title = document.getElementById('post-title').value;
             const content = document.getElementById('post-content').value;
             const fileInput = document.getElementById('post-file');
+            const youtubeInput = document.getElementById('youtube-url');
             const file = fileInput.files[0];
+            const youtubeUrl = youtubeInput.value.trim();
 
-            if (!title || !content) return alert("제목과 내용은 필수입니다.");
+            if (!title || !content) return alert("제목과 내용을 입력해주세요.");
 
-            // 로딩 표시
             document.getElementById('loading').style.display = 'block';
 
-            let imageUrl = null;
+            let finalUrl = null;
 
             try {
-                // 1. 이미지가 있다면 업로드
+                // 1. 파일이 있으면 파일 업로드 우선
                 if (file) {
                     const fileName = `culture_${Date.now()}_${file.name}`;
                     const { error: uploadError } = await sb.storage.from('images').upload(fileName, file);
                     if (uploadError) throw uploadError;
-
-                    // 이미지 주소 가져오기
                     const { data: urlData } = sb.storage.from('images').getPublicUrl(fileName);
-                    imageUrl = urlData.publicUrl;
+                    finalUrl = urlData.publicUrl;
+                }
+                // 2. 파일이 없고 유튜브 주소가 있으면 유튜브 주소 사용
+                else if (youtubeUrl) {
+                    finalUrl = youtubeUrl;
                 }
 
-                // 2. 게시글 저장
                 const { error: dbError } = await sb.from('culture_posts').insert([{
                     title: title,
                     content: content,
-                    image_url: imageUrl
+                    image_url: finalUrl
                 }]);
 
                 if (dbError) throw dbError;
@@ -275,12 +263,11 @@
                 location.reload();
 
             } catch (err) {
-                alert("오류 발생: " + err.message);
+                alert("오류: " + err.message);
                 document.getElementById('loading').style.display = 'none';
             }
         }
 
-        // [목록 불러오기]
         async function loadManageList(sb) {
             const { data, error } = await sb.from('culture_posts').select('*').order('created_at', { ascending: false });
             const listDiv = document.getElementById('manage-list');
@@ -295,16 +282,15 @@
                 const date = item.created_at.split('T')[0];
                 listDiv.innerHTML += `
                         <div class="post-item">
-                            <div class="post-info">
-                                <div class="post-title">${item.title}</div>
-                                <div class="post-date">${date}</div>
+                            <div>
+                                <span style="font-weight:bold;">${item.title}</span><br>
+                                <span style="font-size:0.8rem; color:#888;">${date}</span>
                             </div>
                             <button onclick="deletePost(${item.id})" class="btn-del">삭제</button>
                         </div>`;
             });
         }
 
-        // [삭제]
         async function deletePost(id) {
             if (!confirm("정말 삭제하시겠습니까?")) return;
             const { error } = await window.sb.from('culture_posts').delete().eq('id', id);

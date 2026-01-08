@@ -9,6 +9,7 @@
             background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
         }
 
+        /* 갤러리 그리드 */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -31,11 +32,29 @@
                 border-color: var(--accent-color);
             }
 
-        .card-img {
+        .card-img-wrap {
             width: 100%;
             height: 220px;
-            object-fit: cover;
+            position: relative;
             background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            display: none;
         }
 
         .card-body {
@@ -76,7 +95,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 10000;
             justify-content: center;
             align-items: center;
@@ -86,31 +105,69 @@
         .modal-content {
             background: white;
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
             max-height: 90vh;
             border-radius: 15px;
             overflow-y: auto;
             position: relative;
-            padding: 30px;
-        }
-
-        .modal-img {
-            width: 100%;
-            height: auto;
-            max-height: 400px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .close-btn {
             position: absolute;
             top: 15px;
             right: 15px;
+            width: 35px;
+            height: 35px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            color: white;
+            border: none;
             font-size: 24px;
             cursor: pointer;
-            border: none;
-            background: none;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .close-btn:hover {
+                background: rgba(0,0,0,0.8);
+            }
+
+        .modal-media-area {
+            width: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+
+        .modal-img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            display: none;
+        }
+
+        .modal-video {
+            width: 100%;
+            height: 400px;
+            display: none;
+        }
+
+        .modal-body-text {
+            padding: 30px;
+        }
+
+        /* 반응형 비디오 */
+        @media (max-width: 768px) {
+            .modal-video {
+                height: 250px;
+            }
         }
     </style>
 </head>
@@ -136,17 +193,24 @@
     <div id="post-modal" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal(event)">×</button>
-            <img id="modal-img" class="modal-img" src="" style="display:none;">
-            <h3 id="modal-title" style="margin-bottom:15px; color:#1a3c6e;"></h3>
-            <div id="modal-text" style="white-space:pre-wrap; color:#444; line-height:1.6;"></div>
-            <div id="modal-date" style="text-align:right; color:#999; margin-top:20px; font-size:0.9rem;"></div>
+
+            <div class="modal-media-area">
+                <img id="modal-img" class="modal-img" src="">
+                <iframe id="modal-video" class="modal-video" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+
+            <div class="modal-body-text">
+                <h3 id="modal-title" style="margin-bottom:15px; color:#1a3c6e; font-size:1.5rem;"></h3>
+                <div id="modal-text" style="white-space:pre-wrap; color:#444; line-height:1.6;"></div>
+                <div id="modal-date" style="text-align:right; color:#999; margin-top:20px; font-size:0.9rem;"></div>
+            </div>
         </div>
     </div>
 
     <footer></footer>
     <script src="manager.js"></script>
     <script>
-        // manager.js를 통해 데이터 로딩 (Supabase 키는 manager.js에 있음)
+        // manager.js 로딩 대기
         document.addEventListener("DOMContentLoaded", function () {
             const checkSb = setInterval(() => {
                 if (window.sb) {
@@ -155,6 +219,15 @@
                 }
             }, 100);
         });
+
+        // [유튜브 ID 추출 함수]
+        function getYoutubeId(url) {
+            if (!url) return null;
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            if (match && match[7].length === 11) return match[7];
+            return null;
+        }
 
         async function loadCulturePosts(sb) {
             const list = document.getElementById('culture-list');
@@ -168,12 +241,27 @@
 
             data.forEach(item => {
                 const date = item.created_at ? item.created_at.split('T')[0] : "";
-                const imgUrl = item.image_url || 'https://via.placeholder.com/400x300?text=No+Image';
+                let imgUrl = item.image_url;
+                let isVideo = false;
+
+                // 유튜브 링크인지 확인
+                const yId = getYoutubeId(imgUrl);
+                if (yId) {
+                    imgUrl = `https://img.youtube.com/vi/${yId}/hqdefault.jpg`; // 유튜브 썸네일 사용
+                    isVideo = true;
+                } else if (!imgUrl) {
+                    imgUrl = 'https://via.placeholder.com/400x300?text=No+Image';
+                }
+
                 const div = document.createElement('div');
                 div.className = 'card';
                 div.onclick = () => openModal(item);
+
                 div.innerHTML = `
-                        <img src="${imgUrl}" class="card-img">
+                        <div class="card-img-wrap">
+                            <img src="${imgUrl}" class="card-img">
+                            <div class="play-icon" style="display:${isVideo ? 'block' : 'none'}">▶</div>
+                        </div>
                         <div class="card-body">
                             <div class="card-title">${item.title}</div>
                             <div class="card-text">${item.content}</div>
@@ -187,9 +275,28 @@
             document.getElementById('modal-title').innerText = item.title;
             document.getElementById('modal-text').innerText = item.content;
             document.getElementById('modal-date').innerText = item.created_at.split('T')[0];
+
             const imgEl = document.getElementById('modal-img');
-            if (item.image_url) { imgEl.src = item.image_url; imgEl.style.display = 'block'; }
-            else { imgEl.style.display = 'none'; }
+            const videoEl = document.getElementById('modal-video');
+            const yId = getYoutubeId(item.image_url);
+
+            if (yId) {
+                // 유튜브인 경우
+                imgEl.style.display = 'none';
+                videoEl.style.display = 'block';
+                videoEl.src = `https://www.youtube.com/embed/${yId}?autoplay=1&rel=0`;
+            } else if (item.image_url) {
+                // 일반 이미지인 경우
+                videoEl.style.display = 'none';
+                videoEl.src = ""; // 영상 정지
+                imgEl.src = item.image_url;
+                imgEl.style.display = 'block';
+            } else {
+                // 둘 다 없는 경우
+                videoEl.style.display = 'none';
+                imgEl.style.display = 'none';
+            }
+
             document.getElementById('post-modal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
@@ -197,6 +304,7 @@
         function closeModal(event) {
             if (event.target === event.currentTarget || event.target.classList.contains('close-btn')) {
                 document.getElementById('post-modal').style.display = 'none';
+                document.getElementById('modal-video').src = ""; // 팝업 닫으면 영상 정지
                 document.body.style.overflow = 'auto';
             }
         }
