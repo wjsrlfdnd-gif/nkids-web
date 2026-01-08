@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴키즈 - 원어민 문화 체험</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* [기본 스타일] */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: #fff;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        :root {
+            --primary-color: #1a3c6e;
+            --accent-color: #f4a261;
+            --bg-light: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        /* [서브 배너] */
+        .sub-hero {
+            height: 350px;
+            background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+            margin-top: 50px;
+        }
+
+            .sub-hero h1 {
+                font-size: 3.2rem;
+                font-weight: 800;
+                margin-bottom: 20px;
+                text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+                letter-spacing: -1px;
+            }
+
+            .sub-hero p {
+                font-size: 1.4rem;
+                font-weight: 600;
+                color: #ffdca8;
+                text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+            }
+
+        /* [소개 박스] */
+        .intro-summary {
+            background-color: #fff;
+            text-align: center;
+            padding: 60px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .intro-box {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid var(--primary-color);
+            padding: 40px;
+            border-radius: 15px;
+            background-color: #fff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+            .intro-box h3 {
+                font-size: 1.6rem;
+                color: var(--primary-color);
+                margin-bottom: 20px;
+            }
+
+            .intro-box p {
+                font-size: 1.1rem;
+                color: #555;
+                word-break: keep-all;
+            }
+
+        /* [갤러리 그리드] */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        /* [카드 스타일] */
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid #eee;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            /* 카드 너비 제한 및 중앙 정렬 */
+            max-width: 380px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+            .card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+                border-color: var(--accent-color);
+            }
+
+        .card-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-text {
+            font-size: 0.95rem;
+            color: #666;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .card-date {
+            font-size: 0.85rem;
+            color: #999;
+            text-align: right;
+        }
+
+        /* [팝업(모달) 스타일] */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            border-radius: 15px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            position: relative;
+        }
+
+        .modal-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+            .close-btn:hover {
+                background: rgba(0,0,0,0.8);
+            }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            line-height: 1.3;
+        }
+
+        .modal-text {
+            font-size: 1.05rem;
+            color: #444;
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+
+        .modal-date {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #999;
+            text-align: right;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .sub-hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .sub-hero p {
+                font-size: 1.1rem;
+                padding: 0 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header></header> <section class="sub-hero">
+        <div>
+            <h1>원어민 문화 체험</h1>
+            <p>세계 여러 나라의 문화를 원어민 선생님과 생생하게 경험해요!</p>
+        </div>
+    </section>
+
+    <section class="intro-summary">
+        <div class="intro-box">
+            <h3>🌍 글로벌 리더로 자라나는 첫걸음</h3>
+            <p>
+                매달 새로운 나라의 문화를 체험하며, 아이들의 시야를 넓혀줍니다.<br>
+                원어민 선생님과 함께하는 즐거운 놀이 활동을 통해<br>
+                자연스럽게 영어를 접하고 다문화 감수성을 키울 수 있습니다.
+            </p>
+        </div>
+    </section>
+
+    <section style="background-color: var(--bg-light);">
+        <div class="container">
+            <h2 style="text-align: left; margin-bottom: 30px;">📸 체험 활동 현장</h2>
+
+            <div id="culture-list" class="gallery-grid">
+                <div style="text-align:center; width:100%; grid-column: 1/-1; padding:50px; color:#666;">
+                    게시글을 불러오는 중입니다...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="post-modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal(event)">×</button>
+                <img id="modal-img" class="modal-img" src="" style="display:none;">
+            </div>
+            <div class="modal-body">
+                <h3 id="modal-title" class="modal-title"></h3>
+                <div id="modal-text" class="modal-text"></div>
+                <div id="modal-date" class="modal-date"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer></footer>
+    <script src="manager.js"></script>
+
+    <script>
+        // [페이지 로드 및 데이터 실행]
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(() => {
+                const sb = window.sb; // manager.js에서 초기화된 Supabase 객체 사용
+                if (!sb) {
+                    document.getElementById('culture-list').innerHTML =
+                        "<div style='text-align:center; padding:50px;'>데이터 연결 오류</div>";
+                    return;
+                }
+                loadCulturePosts(sb);
+            }, 500); // manager.js 로딩 대기
+        });
+
+        // [게시글 목록 불러오기]
+        async function loadCulturePosts(sb) {
+            const list = document.getElementById('culture-list');
+
+            // culture_posts 테이블에서 데이터 가져오기
+            const { data, error } = await sb
+                .from('culture_posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            list.innerHTML = "";
+
+            if (error || !data || data.length === 0) {
+                list.innerHTML = `<div style="text-align:center; grid-column:1/-1; padding:50px;">등록된 게시글이 없습니다.</div>`;
+                return;
+            }
+
+            data.forEach(item => {
+                const date = item.created_at ? item.created_at.split('T')[0] : "";
+                const imgUrl = item.image_url || 'https://via.placeholder.com/400x300?text=No+Image';
+
+                const div = document.createElement('div');
+                div.className = 'card';
+                // 클릭 시 팝업 열기
+                div.onclick = () => openModal(item);
+
+                div.innerHTML = `
+                        <img src="${imgUrl}" class="card-img" onerror="this.src='https://via.placeholder.com/400x300?text=Error'">
+                        <div class="card-body">
+                            <div class="card-title">${item.title}</div>
+                            <div class="card-text">${item.content}</div>
+                            <div class="card-date">${date}</div>
+                        </div>
+                    `;
+                list.appendChild(div);
+            });
+        }
+
+        // [팝업 열기]
+        function openModal(item) {
+            document.getElementById('modal-title').innerText = item.title;
+            document.getElementById('modal-text').innerText = item.content;
+            document.getElementById('modal-date').innerText = item.created_at.split('T')[0];
+
+            const imgEl = document.getElementById('modal-img');
+            if (item.image_url) {
+                imgEl.src = item.image_url;
+                imgEl.style.display = 'block';
+            } else {
+                imgEl.style.display = 'none';
+            }
+
+            document.getElementById('post-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // 배경 스크롤 잠금
+        }
+
+        // [팝업 닫기]
+        function closeModal(event) {
+            if (event.target === event.currentTarget || event.target.classList.contains('close-btn')) {
+                document.getElementById('post-modal').style.display = 'none';
+                document.body.style.overflow = 'auto'; // 스크롤 잠금 해제
+            }
+        }
+    </script>
+</body>
+</html>

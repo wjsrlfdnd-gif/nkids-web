@@ -1,0 +1,295 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴키즈 - 문화체험 관리자 페이지</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* [관리자 페이지 전용 스타일] */
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 100px 20px 50px;
+        }
+        /* 헤더 공간 확보 */
+
+        /* 로그인 박스 */
+        #login-section {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+            #login-section input {
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+
+        /* 관리자 패널 (글쓰기 + 목록) */
+        #admin-section {
+            display: none;
+        }
+        /* 로그인 전 숨김 */
+
+        .panel-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #1a3c6e;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* 입력 폼 */
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            margin-top: 15px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        /* 버튼 */
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #1a3c6e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+            .btn-action:hover {
+                background: #142d53;
+            }
+
+        .btn-logout {
+            background: #666;
+            margin-top: 10px;
+        }
+
+        /* 게시글 관리 목록 */
+        .post-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .post-info {
+            font-size: 0.95rem;
+        }
+
+        .post-title {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .post-date {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .btn-del {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header></header> <div class="container">
+
+        <div id="login-section">
+            <h2 style="text-align:center; border:none;">🔒 관리자 로그인</h2>
+            <input type="email" id="admin-email" placeholder="이메일">
+            <input type="password" id="admin-password" placeholder="비밀번호">
+            <button onclick="adminLogin()" class="btn-action">로그인</button>
+        </div>
+
+        <div id="admin-section">
+            <div class="panel-box">
+                <h2>📝 새 글 작성하기</h2>
+
+                <label>제목</label>
+                <input type="text" id="post-title" placeholder="제목을 입력하세요">
+
+                <label>이미지 주소 (URL)</label>
+                <input type="text" id="post-image" placeholder="https://...">
+                <p style="font-size:0.8rem; color:#888; margin-top:5px;">* 이미지가 없다면 비워두셔도 됩니다.</p>
+
+                <label>내용</label>
+                <textarea id="post-content" placeholder="내용을 입력하세요"></textarea>
+
+                <button onclick="savePost()" class="btn-action">게시글 업로드</button>
+                <button onclick="logout()" class="btn-action btn-logout">로그아웃</button>
+            </div>
+
+            <div class="panel-box">
+                <h2>🗑️ 게시글 관리 (삭제)</h2>
+                <div id="manage-list">
+                    <p style="text-align:center; color:#999;">로딩 중...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer></footer>
+    <script src="manager.js"></script>
+
+    <script>
+        // manager.js가 로드된 후 실행
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(() => {
+                const sb = window.sb;
+                if (!sb) { alert("Supabase 연결 실패!"); return; }
+
+                checkSession(sb); // 로그인 체크
+            }, 500);
+        });
+
+        // [로그인 체크]
+        async function checkSession(sb) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session) {
+                // 로그인 됨 -> 입력폼 보여주기
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('admin-section').style.display = 'block';
+                loadManageList(sb); // 목록 불러오기
+            } else {
+                // 로그인 안 됨 -> 로그인폼 보여주기
+                document.getElementById('login-section').style.display = 'block';
+                document.getElementById('admin-section').style.display = 'none';
+            }
+        }
+
+        // [로그인 함수]
+        async function adminLogin() {
+            const sb = window.sb;
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+            if (error) alert("로그인 실패: " + error.message);
+            else location.reload();
+        }
+
+        // [로그아웃 함수]
+        async function logout() {
+            await window.sb.auth.signOut();
+            location.reload();
+        }
+
+        // [글 저장]
+        async function savePost() {
+            const sb = window.sb;
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+            const image = document.getElementById('post-image').value;
+
+            if (!title || !content) return alert("제목과 내용은 필수입니다.");
+
+            const { error } = await sb.from('culture_posts').insert([{ title, content, image_url: image }]);
+
+            if (error) alert("에러: " + error.message);
+            else {
+                alert("업로드 완료!");
+                // 입력창 비우기
+                document.getElementById('post-title').value = "";
+                document.getElementById('post-content').value = "";
+                document.getElementById('post-image').value = "";
+                loadManageList(sb); // 목록 갱신
+            }
+        }
+
+        // [관리용 목록 불러오기]
+        async function loadManageList(sb) {
+            const { data, error } = await sb
+                .from('culture_posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            const listDiv = document.getElementById('manage-list');
+            listDiv.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                listDiv.innerHTML = "<p style='text-align:center;'>등록된 글이 없습니다.</p>";
+                return;
+            }
+
+            data.forEach(item => {
+                const date = item.created_at.split('T')[0];
+                listDiv.innerHTML += `
+                    <div class="post-item">
+                        <div class="post-info">
+                            <div class="post-title">${item.title}</div>
+                            <div class="post-date">${date}</div>
+                        </div>
+                        <button onclick="deletePost(${item.id})" class="btn-del">삭제</button>
+                    </div>
+                `;
+            });
+        }
+
+        // [글 삭제]
+        async function deletePost(id) {
+            if (!confirm("정말 삭제하시겠습니까? 복구할 수 없습니다.")) return;
+            const sb = window.sb;
+            const { error } = await sb.from('culture_posts').delete().eq('id', id);
+
+            if (error) alert("삭제 실패");
+            else {
+                alert("삭제되었습니다.");
+                loadManageList(sb); // 목록 갱신
+            }
+        }
+    </script>
+</body>
+</html>
