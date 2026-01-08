@@ -2,70 +2,110 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>뉴키즈 - 퍼포먼스 행사</title>
     <style>
-        /* [기본 스타일] */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Pretendard', sans-serif; color: #333; line-height: 1.6; background: #fff; }
-        a { text-decoration: none; color: inherit; }
-        
-        :root { --primary-color: #1a3c6e; --accent-color: #f4a261; --bg-light: #f8f9fa; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-        section { padding: 80px 0; }
-        h2 { font-size: 2.2rem; text-align: center; margin-bottom: 20px; color: var(--primary-color); font-weight: 700; }
-        .section-desc { text-align: center; color: #666; margin-bottom: 50px; font-size: 1.1rem; }
-        
-        .btn { display: inline-block; padding: 12px 30px; background-color: var(--accent-color); color: #fff; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        .btn:hover { background-color: #e76f51; }
+        /* 페이지 전용 스타일만 남김 (공통 요소는 manager.js에 있음) */
 
-        /* [헤더] */
-        header { width: 100%; height: 70px; background-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: fixed; top: 0; z-index: 1000; }
-        .header-inner { display: flex; justify-content: space-between; align-items: center; height: 100%; }
-        .logo { font-size: 1.5rem; font-weight: 900; color: var(--primary-color); }
-        .nav-menu { display: flex; gap: 30px; }
-        .nav-menu li a:hover { color: var(--accent-color); }
-
-        /* [서브 배너 (가독성 강화)] */
+        /* 서브 배너 배경 이미지 지정 */
         .sub-hero {
-            height: 350px;
-            /* 파티/풍선 이미지 + 어두운 필터 */
             background: linear-gradient(rgba(26,60,110,0.85), rgba(26,60,110,0.85)), url('https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=1600&q=80') center/center no-repeat;
+        }
+
+        /* 배지 스타일 */
+        .subject-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .bg-korean {
+            background-color: #e76f51;
+        }
+
+        .bg-math {
+            background-color: #2a9d8f;
+        }
+
+        .bg-art {
+            background-color: #f4a261;
+        }
+
+        .bg-science {
+            background-color: #457b9d;
+        }
+
+        /* 카드 그리드 */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #eee;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+                border-color: var(--accent-color);
+            }
+
+        .product-img {
+            width: 100%;
+            height: 200px;
+            background-color: #ddd;
             background-size: cover;
-            display: flex; align-items: center; justify-content: center; text-align: center; color: #fff; margin-top: 70px;
+            background-position: center;
         }
-        .sub-hero h1 { font-size: 3.2rem; font-weight: 800; margin-bottom: 20px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: -1px; }
-        .sub-hero p { font-size: 1.4rem; font-weight: 600; color: #ffdca8; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
 
-        /* [행사 카드 그리드] */
-        .event-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        
-        .event-card { 
-            background: #fff; border-radius: 15px; overflow: hidden; border: 1px solid #eee; 
-            transition: 0.3s; display: flex; flex-direction: column;
+        .product-info {
+            padding: 30px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
-        .event-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--accent-color); }
-        
-        .event-img { width: 100%; height: 200px; background-color: #ddd; background-size: cover; background-position: center; }
-        .event-info { padding: 25px; flex: 1; display: flex; flex-direction: column; }
-        .event-tag { 
-            display: inline-block; padding: 5px 12px; border-radius: 15px; 
-            font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; color: #fff; width: fit-content;
+
+        .product-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
         }
-        .event-title { font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; color: #333; }
-        .event-desc { color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 15px; flex: 1; }
 
+        .product-desc {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            flex: 1;
+        }
 
-        /* [태그 색상 - 퍼포먼스 전용] */
-        .bg-emotion { background-color: #e63946; }  /* 감성/동화 (빨강) */
-        .bg-creative { background-color: #f4a261; } /* 창의/상상 (오렌지) */
-        .bg-role { background-color: #2a9d8f; }     /* 역할/직업 (청록) */
-        .bg-body { background-color: #7209b7; }     /* 신체놀이 (보라) */
-        .bg-safety { background-color: #1a3c6e; }   /* 안전교육 (네이비) */
-        .bg-explore { background-color: #8d6e63; }  /* 탐구/체험 (갈색) */
-        .bg-sense { background-color: #4cc9f0; }    /* 오감/감각 (하늘) */
-        
-        footer { background: #222; color: #888; padding: 40px 0; text-align: center; }
+        .product-features {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #555;
+            list-style: none;
+        }
+
+            .product-features li::before {
+                content: "✔";
+                color: var(--accent-color);
+                margin-right: 5px;
+            }
     </style>
 </head>
 <body>
@@ -83,9 +123,9 @@
         <div class="container">
             <h2>인기 퍼포먼스 프로그램</h2>
             <p class="section-desc">보는 것을 넘어 직접 참여하며 주인공이 되는 특별한 시간</p>
-            
+
             <div class="event-grid">
-                
+
                 <div class="event-card">
                     <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1566222829713-5f9518526308?auto=format&fit=crop&w=500&q=60');"></div>
                     <div class="event-info">
